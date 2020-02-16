@@ -78,9 +78,8 @@ public:
     void regInit();
     int regSet(const size_t &flag, const bool &value);
     int regGet(const size_t &flag, bool &value);
-
-    static int commandEncode(const int &command, const int &operand, int &value);
-    static int commandDecode(const int &value, int &command, int &operand);
+    int commandEncode(const int &command, const int &operand, int &value);
+    int commandDecode(const int &value, int &command, int &operand);
 };
 
 SimpleComputer *SimpleComputer::instance = 0;
@@ -178,7 +177,31 @@ int SimpleComputer::regGet(const size_t &flag, bool &value)
     return 1;
 }
 
-int SimpleComputer::commandEncode(const int &command, const int &operand, int &value);
+int SimpleComputer::commandEncode(const int &command, const int &operand, int &value)
+{
+    if ((command < 10) || (command > 11 && command < 20) || (command > 21 && command < 30) ||
+        (command > 33 && command < 40) || (command > 43 && command < 51) || (command > 76) ||
+        (operand > 0x7f))
+        return 0;
 
-int SimpleComputer::commandDecode(const int &value, int &command, int &operand);
+    value = 0x0;
+    value |= command << 7;
+    value |= operand;
+    return 1;
+}
+
+int SimpleComputer::commandDecode(const int &value, int &command, int &operand)
+{
+    if ((value & 0x4000) == 0x4000) //if 15 bit isnt 0
+    {
+        regSet(WRONG_COMAND, 1);
+        return 0;
+    }
+
+    operand = command = 0x0;
+    operand |= value & 0x7f;
+    command |= (value >> 7) & 0x7f;
+
+    return 1;
+}
 #endif
