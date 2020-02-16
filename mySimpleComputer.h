@@ -13,23 +13,43 @@
 #define OPERATION_OVERFLOW 3
 #define DEVISION_ZERO 4
 
-class SimpleComputer
+class SimpleComputer //Singleton
 {
 private:
     std::array<int, MEM_SIZE> memorry;
     uint32_t flagRegister;
 
+    static SimpleComputer *instance;
+    SimpleComputer();
+
 public:
+    static SimpleComputer *getInstance();
     int memmorySet(const size_t &adress, const int &value);
-    int memmoryGet(const size_t &adress, int &value) const;
-    int memmorySave(const std::string &fileName) const;
+    int memmoryGet(const size_t &adress, int &value);
+    int memmorySave(const std::string &fileName);
     int memmoryLoad(const std::string &fileName);
     int regSet(const size_t &flag, const bool &value);
-    int regGet(const size_t &flag, bool &value) const;
+    int regGet(const size_t &flag, bool &value);
 
-    static int commandEncode(const int &command, const int &operand, int &value) const;
-    static int commandDecode(const int &value, int &command, int &operand) const;
+    static int commandEncode(const int &command, const int &operand, int &value);
+    static int commandDecode(const int &value, int &command, int &operand);
 };
+
+SimpleComputer *SimpleComputer::instance = 0;
+
+SimpleComputer::SimpleComputer()
+{
+    flagRegister = 0;
+}
+
+SimpleComputer *SimpleComputer::getInstance()
+{
+    if (instance == nullptr)
+    {
+        instance = new SimpleComputer();
+    }
+    return instance;
+}
 
 int SimpleComputer::memmorySet(const size_t &adress, const int &value)
 {
@@ -43,7 +63,7 @@ int SimpleComputer::memmorySet(const size_t &adress, const int &value)
     return 1;
 }
 
-int SimpleComputer::memmoryGet(const size_t &adress, int &value) const
+int SimpleComputer::memmoryGet(const size_t &adress, int &value)
 {
     if (adress >= memorry.size())
     {
@@ -68,7 +88,7 @@ int SimpleComputer::regSet(const size_t &flag, const bool &value)
     return 1;
 }
 
-int SimpleComputer::regGet(const size_t &flag, bool &value) const
+int SimpleComputer::regGet(const size_t &flag, bool &value)
 {
     if (flag > MAX_FLAG)
         return 0;
