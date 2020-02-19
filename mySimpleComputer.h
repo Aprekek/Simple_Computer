@@ -4,7 +4,7 @@
 #include <string>
 #include <fstream>
 
-#define MEM_SIZE 10
+#define MEM_SIZE 100
 
 //-------Comands-------
 #define READ 0x10
@@ -63,7 +63,7 @@
 class SimpleComputer //Singleton
 {
 private:
-    int memmory[MEM_SIZE];
+    int *memmory;
     uint32_t flagRegister;
 
     static SimpleComputer *instance;
@@ -75,18 +75,33 @@ public:
     int memmoryGet(const size_t &adress, int &value);
     int memmorySave(const std::string &fileName);
     int memmoryLoad(const std::string &fileName);
+    void memInit();
     void regInit();
     int regSet(const size_t &flag, const bool &value);
     int regGet(const size_t &flag, bool &value);
     int commandEncode(const int &command, const int &operand, int &value);
     int commandDecode(const int &value, int &command, int &operand);
+
+    //delete !!!
+    void memPrint();
+    void regPrint();
 };
 
 SimpleComputer *SimpleComputer::instance = 0;
 
 SimpleComputer::SimpleComputer()
 {
-    regInit();
+    memmory = new int[MEM_SIZE];
+    if (memmory != nullptr)
+    {
+        memInit();
+        regInit();
+    }
+    else
+    {
+        std::cout << "Cannoy allocate memmory (SimpleComputer <memmory>)\n";
+        exit(EXIT_FAILURE);
+    }
 }
 
 SimpleComputer *SimpleComputer::getInstance()
@@ -150,6 +165,12 @@ int SimpleComputer::memmoryLoad(const std::string &fileName)
     return 1;
 }
 
+void SimpleComputer::memInit()
+{
+    for (size_t i = 0; i < MEM_SIZE; i++)
+        memmory[i] = 0;
+}
+
 void SimpleComputer::regInit()
 {
     flagRegister = 0;
@@ -204,4 +225,17 @@ int SimpleComputer::commandDecode(const int &value, int &command, int &operand)
 
     return 1;
 }
+
+void SimpleComputer::memPrint()
+{
+    for (size_t i = 0; i < MEM_SIZE; i++)
+        std::cout << memmory[i] << ' ';
+    std::cout << std::endl;
+}
+
+void SimpleComputer::regPrint()
+{
+    std::cout << flagRegister << std::endl;
+}
+
 #endif
