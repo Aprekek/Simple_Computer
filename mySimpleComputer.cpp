@@ -151,16 +151,3 @@ int SimpleComputer::commandDecode(const int &value, int &command, int &operand)
 
     return 1;
 }
-
-//delete !!!
-void SimpleComputer::memPrint()
-{
-    for (size_t i = 0; i < MEM_SIZE; i++)
-        std::cout << memmory[i] << ' ';
-    std::cout << std::endl;
-}
-
-void SimpleComputer::regPrint()
-{
-    std::cout << flagRegister << std::endl;
-}

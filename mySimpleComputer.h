@@ -81,10 +81,6 @@ public:
     int regGet(const size_t &flag, bool &value);
     int commandEncode(const int &command, const int &operand, int &value);
     int commandDecode(const int &value, int &command, int &operand);
-
-    //delete !!!
-    void memPrint();
-    void regPrint();
 };
 
 #endif
