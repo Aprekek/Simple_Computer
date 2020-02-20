@@ -82,9 +82,9 @@ public:
     int commandEncode(const int &command, const int &operand, int &value);
     int commandDecode(const int &value, int &command, int &operand);
 
-    //delete !!!
+    /*//delete !!!
     void memPrint();
-    void regPrint();
+    void regPrint();*/
 };
 
 SimpleComputer *SimpleComputer::instance = 0;
@@ -200,10 +200,13 @@ int SimpleComputer::regGet(const size_t &flag, bool &value)
 
 int SimpleComputer::commandEncode(const int &command, const int &operand, int &value)
 {
-    if ((command < 0x0) || (command > 0x11 && command < 0x20) || (command > 0x21 && command < 0x30) ||
+    if ((command < 0x10) || (command > 0x11 && command < 0x20) || (command > 0x21 && command < 0x30) ||
         (command > 0x33 && command < 0x40) || (command > 0x43 && command < 0x51) || (command > 0x76) ||
         (operand > 0x7f))
-        return 0;
+    {
+        regSet(WRONG_COMAND, 1);
+        return WRONG_COMAND;
+    }
 
     value = 0x0;
     value |= command;
@@ -217,17 +220,25 @@ int SimpleComputer::commandDecode(const int &value, int &command, int &operand)
     if ((value & 0x4000) == 0x4000) //if 15 bit isnt 0
     {
         regSet(WRONG_COMAND, 1);
-        return 0;
+        return WRONG_COMAND;
     }
 
     operand = command = 0x0;
     operand |= value & 0x7f;
     command |= (value >> 7) & 0x7f;
 
+    if ((command < 0x10) || (command > 0x11 && command < 0x20) || (command > 0x21 && command < 0x30) ||
+        (command > 0x33 && command < 0x40) || (command > 0x43 && command < 0x51) || (command > 0x76) ||
+        (operand > 0x7f))
+    {
+        regSet(WRONG_COMAND, 1);
+        return WRONG_COMAND;
+    }
+
     return 1;
 }
 
-//delete !!!
+/*//delete !!!
 void SimpleComputer::memPrint()
 {
     for (size_t i = 0; i < MEM_SIZE; i++)
@@ -238,6 +249,6 @@ void SimpleComputer::memPrint()
 void SimpleComputer::regPrint()
 {
     std::cout << flagRegister << std::endl;
-}
+}*/
 
 #endif
