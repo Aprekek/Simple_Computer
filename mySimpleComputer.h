@@ -200,13 +200,14 @@ int SimpleComputer::regGet(const size_t &flag, bool &value)
 
 int SimpleComputer::commandEncode(const int &command, const int &operand, int &value)
 {
-    if ((command < 10) || (command > 11 && command < 20) || (command > 21 && command < 30) ||
-        (command > 33 && command < 40) || (command > 43 && command < 51) || (command > 76) ||
+    if ((command < 0x0) || (command > 0x11 && command < 0x20) || (command > 0x21 && command < 0x30) ||
+        (command > 0x33 && command < 0x40) || (command > 0x43 && command < 0x51) || (command > 0x76) ||
         (operand > 0x7f))
         return 0;
 
     value = 0x0;
-    value |= command << 7;
+    value |= command;
+    value <<= 7;
     value |= operand;
     return 1;
 }
@@ -226,6 +227,7 @@ int SimpleComputer::commandDecode(const int &value, int &command, int &operand)
     return 1;
 }
 
+//delete !!!
 void SimpleComputer::memPrint()
 {
     for (size_t i = 0; i < MEM_SIZE; i++)
