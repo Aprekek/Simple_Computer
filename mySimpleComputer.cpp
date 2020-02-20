@@ -1,103 +1,166 @@
 #include <iostream>
 #include "mySimpleComputer.h"
 
-int main()
+SimpleComputer *SimpleComputer::instance = 0;
+
+SimpleComputer::SimpleComputer()
 {
-    SimpleComputer *sc_instance = SimpleComputer::getInstance();
-    int value, command, operand, adress, flag, ch;
-    std::string filePath;
-    bool flagValue;
-
-    do
+    memmory = new int[MEM_SIZE];
+    if (memmory != nullptr)
     {
-        std::cout << "1) Print memmory\n"
-                  << "2) Print flagRegister\n"
-                  << "3) Init memmory\n"
-                  << "4) Init flagRegister\n"
-                  << "5) Set memmory\n"
-                  << "6) Get memmory\n"
-                  << "7) Save memmory\n"
-                  << "8) Read memmory\n"
-                  << "9) Set flag to register\n"
-                  << "10) Get flag from register\n"
-                  << "11) Encode command\n"
-                  << "12) Decode command\n"
-                  << "0) Exit\n";
-        std::cin >> ch;
+        memInit();
+        regInit();
+    }
+    else
+    {
+        std::cout << "Cannoy allocate memmory (SimpleComputer <memmory>)\n";
+        exit(EXIT_FAILURE);
+    }
+}
 
-        switch (ch)
-        {
-        case 1:
-            sc_instance->memPrint();
-            break;
-        case 2:
-            sc_instance->regPrint();
-            break;
-        case 3:
-            sc_instance->memInit();
-            break;
-        case 4:
-            sc_instance->regInit();
-            break;
-        case 5:
-            std::cout << "adress: ";
-            std::cin >> adress;
-            std::cout << "value: ";
-            std::cin >> value;
-            sc_instance->memmorySet(adress, value);
-            break;
-        case 6:
-            std::cout << "adress: ";
-            std::cin >> adress;
-            sc_instance->memmoryGet(adress, value);
-            std::cout << "value: " << value << std::endl;
-            break;
-        case 7:
-            std::cout << "path to file: ";
-            std::cin >> filePath;
-            sc_instance->memmorySave(filePath);
-            break;
-        case 8:
-            std::cout << "path to file: ";
-            std::cin >> filePath;
-            sc_instance->memmoryLoad(filePath);
-            break;
-        case 9:
-            std::cout << "flag: ";
-            std::cin >> flag;
-            std::cout << "value: ";
-            std::cin >> flagValue;
-            sc_instance->regSet(flag, flagValue);
-            break;
-        case 10:
-            std::cout << "flag: ";
-            std::cin >> flag;
-            sc_instance->regGet(flag, flagValue);
-            std::cout << "value: " << flagValue << std::endl;
-            break;
-        case 11:
-            std::cout << "command: ";
-            std::cin >> command;
-            std::cout << "operand: ";
-            std::cin >> operand;
-            sc_instance->commandEncode(command, operand, value);
-            std::cout << "value: " << value << std::endl;
-            break;
-        case 12:
-            std::cout << "value: ";
-            std::cin >> value;
-            if (!sc_instance->commandDecode(value, command, operand))
-                std::cout << "Error\n";
-            std::cout << "command: " << command << "\noperand: " << operand << std::endl;
-            break;
-        case 0:
-            return 0;
-            break;
-        default:
-            std::cout << "dsa\n";
-            break;
-        }
+SimpleComputer *SimpleComputer::getInstance()
+{
+    if (instance == nullptr)
+    {
+        instance = new SimpleComputer();
+    }
+    return instance;
+}
 
-    } while (ch != 'q');
-    return 0;
+int SimpleComputer::memmorySet(const size_t &adress, const int &value)
+{
+    if (adress >= MEM_SIZE)
+    {
+        regSet(MEMORY_OVERRUN, 1);
+        return 0;
+    }
+
+    memmory[adress] = value;
+    return 1;
+}
+
+int SimpleComputer::memmoryGet(const size_t &adress, int &value)
+{
+    if (adress >= MEM_SIZE)
+    {
+        regSet(MEMORY_OVERRUN, 1);
+        return 0;
+    }
+
+    value = memmory[adress];
+    return 1;
+}
+
+int SimpleComputer::memmorySave(const std::string &fileName)
+{
+    std::ofstream file(fileName, std::ios::binary);
+    if (!file.is_open())
+    {
+        std::cout << "Cannot open file \"" << fileName << "\"\n";
+        return 0;
+    }
+
+    file.write((char *)memmory, MEM_SIZE * sizeof(int));
+
+    return 1;
+}
+
+int SimpleComputer::memmoryLoad(const std::string &fileName)
+{
+    std::ifstream file(fileName, std::ios::binary);
+    if (!file.is_open())
+    {
+        std::cout << "Cannot open file \"" << fileName << "\"\n";
+        return 0;
+    }
+
+    file.read((char *)memmory, MEM_SIZE * sizeof(int));
+
+    return 1;
+}
+
+void SimpleComputer::memInit()
+{
+    for (size_t i = 0; i < MEM_SIZE; i++)
+        memmory[i] = 0;
+}
+
+void SimpleComputer::regInit()
+{
+    flagRegister = 0;
+}
+
+int SimpleComputer::regSet(const size_t &flag, const bool &value)
+{
+    if (flag > MAX_FLAG)
+        return 0;
+
+    if (value)
+        flagRegister |= 1 << flag;
+    else
+        flagRegister &= ~(1 << flag);
+
+    return 1;
+}
+
+int SimpleComputer::regGet(const size_t &flag, bool &value)
+{
+    if (flag > MAX_FLAG)
+        return 0;
+
+    value = (flagRegister >> flag) & 0x1;
+    return 1;
+}
+
+int SimpleComputer::commandEncode(const int &command, const int &operand, int &value)
+{
+    if ((command < 0x10) || (command > 0x11 && command < 0x20) || (command > 0x21 && command < 0x30) ||
+        (command > 0x33 && command < 0x40) || (command > 0x43 && command < 0x51) || (command > 0x76) ||
+        (operand > 0x7f))
+    {
+        regSet(WRONG_COMAND, 1);
+        return WRONG_COMAND;
+    }
+
+    value = 0x0;
+    value |= command;
+    value <<= 7;
+    value |= operand;
+    return 1;
+}
+
+int SimpleComputer::commandDecode(const int &value, int &command, int &operand)
+{
+    if ((value & 0x4000) == 0x4000) //if 15 bit isnt 0
+    {
+        regSet(WRONG_COMAND, 1);
+        return WRONG_COMAND;
+    }
+
+    operand = command = 0x0;
+    operand |= value & 0x7f;
+    command |= (value >> 7) & 0x7f;
+
+    if ((command < 0x10) || (command > 0x11 && command < 0x20) || (command > 0x21 && command < 0x30) ||
+        (command > 0x33 && command < 0x40) || (command > 0x43 && command < 0x51) || (command > 0x76) ||
+        (operand > 0x7f))
+    {
+        regSet(WRONG_COMAND, 1);
+        return WRONG_COMAND;
+    }
+
+    return 1;
+}
+
+//delete !!!
+void SimpleComputer::memPrint()
+{
+    for (size_t i = 0; i < MEM_SIZE; i++)
+        std::cout << memmory[i] << ' ';
+    std::cout << std::endl;
+}
+
+void SimpleComputer::regPrint()
+{
+    std::cout << flagRegister << std::endl;
 }
