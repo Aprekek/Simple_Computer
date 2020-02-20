@@ -86,7 +86,8 @@ int main()
         case 12:
             std::cout << "value: ";
             std::cin >> value;
-            sc_instance->commandDecode(value, command, operand);
+            if (!sc_instance->commandDecode(value, command, operand))
+                std::cout << "Error\n";
             std::cout << "command: " << command << "\noperand: " << operand << std::endl;
             break;
         case 0:
