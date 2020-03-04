@@ -35,7 +35,7 @@ public:
         BG_CYAN = 46
     };
 
-    static int clearScrean();
+    static int clearScreen();
     static int gotoXY(int x, int y);
     static int getScreanSize(int &rows, int &cols);
     static int setFgColor(colors fgColor);

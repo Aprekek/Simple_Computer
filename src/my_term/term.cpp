@@ -1,6 +1,6 @@
 #include "includes/term.h"
 
-int Terminal::clearScrean()
+int Terminal::clearScreen()
 {
     char buf[] = "\E[H\E[J";
     size_t length = strlen(buf);
@@ -66,7 +66,7 @@ int main()
 {
     int rows, cols;
 
-    Terminal::clearScrean();
+    Terminal::clearScreen();
     Terminal::setBgColor(Terminal::BG_RED);
     Terminal::setFgColor(Terminal::FG_GREEN);
     Terminal::getScreanSize(rows, cols);
