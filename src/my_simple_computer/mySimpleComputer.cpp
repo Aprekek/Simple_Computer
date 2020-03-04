@@ -1,5 +1,4 @@
-#include <iostream>
-#include "mySimpleComputer.h"
+#include "includes/mySimpleComputer.h"
 
 SimpleComputer *SimpleComputer::instance = 0;
 

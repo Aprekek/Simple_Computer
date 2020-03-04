@@ -1,6 +1,7 @@
 #ifndef MYSIMPLECOMPUTER_H
 #define MYSIMPLECOMPUTER_H
 
+#include <iostream>
 #include <string>
 #include <fstream>
 
