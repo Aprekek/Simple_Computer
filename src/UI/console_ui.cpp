@@ -59,9 +59,6 @@ _UI_ *s_computerUI::getInstance()
 
 int s_computerUI::drawUI() const
 {
-    //Terminal::clearScreen();
-    //initUI(Terminal::BG_BLACK, Terminal::FG_BLUE);
-
     int value;
     char buf[10];
     for (size_t i = 1; i <= 10; ++i)
