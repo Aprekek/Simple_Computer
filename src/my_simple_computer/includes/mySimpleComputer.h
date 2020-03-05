@@ -78,6 +78,7 @@ public:
     int memmoryLoad(const std::string &fileName);
     void memInit();
     void regInit();
+    void init();
     int regSet(const size_t &flag, const bool &value);
     int regGet(const size_t &flag, bool &value);
     int commandEncode(const int &command, const int &operand, int &value);

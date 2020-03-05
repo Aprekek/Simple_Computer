@@ -89,6 +89,12 @@ void SimpleComputer::regInit()
     flagRegister = 0;
 }
 
+void SimpleComputer::init()
+{
+    memInit();
+    regInit();
+}
+
 int SimpleComputer::regSet(const size_t &flag, const bool &value)
 {
     if (flag > MAX_FLAG)

@@ -43,8 +43,7 @@ void _UI_::free()
 s_computerUI::s_computerUI() : _UI_::_UI_()
 {
     manager = SimpleComputer::getInstance();
-    manager->memInit();
-    manager->regInit();
+    manager->init();
 };
 
 _UI_ *s_computerUI::getInstance()
@@ -60,10 +59,9 @@ _UI_ *s_computerUI::getInstance()
 
 int s_computerUI::drawUI() const
 {
-    //???---
     //Terminal::clearScreen();
     //initUI(Terminal::BG_BLACK, Terminal::FG_BLUE);
-    //---???
+
     int value;
     char buf[10];
     for (size_t i = 1; i <= 10; ++i)
@@ -77,25 +75,5 @@ int s_computerUI::drawUI() const
         }
     }
     Terminal::gotoXY(11, 0);
-    return 0;
-}
-
-int main()
-{
-
-    _UI_ *ins = s_computerUI::getInstance();
-    //???---
-    Terminal::clearScreen();
-    ins->initUI(Terminal::BG_BLACK, Terminal::FG_BLUE);
-    ins->drawUI();
-    //---???
-    /*for (size_t i = 0; i <= 2; ++i)
-    {
-        for (size_t j = 0; j < 3; ++j)
-        {
-            Terminal::gotoXY(i + 10, j * 7);
-            write(1, "fds", 3);
-        }
-    }*/
     return 0;
 }
