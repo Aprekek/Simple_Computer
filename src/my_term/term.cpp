@@ -3,7 +3,7 @@
 int Terminal::clearScreen()
 {
     char buf[] = "\E[H\E[J";
-    size_t length = strlen(buf);
+    int length = strlen(buf);
 
     if (write(1, buf, length) < length)
         return -1;
@@ -40,7 +40,7 @@ int Terminal::setFgColor(colors fgColor)
 {
     char buf[20];
     sprintf(buf, "\E[%dm", fgColor);
-    size_t length = strlen(buf);
+    int length = strlen(buf);
 
     if (write(1, buf, length) < length)
         return -1;
@@ -52,7 +52,7 @@ int Terminal::setBgColor(colors BgColor)
 {
     char buf[20];
     sprintf(buf, "\E[%dm", BgColor);
-    size_t length = strlen(buf);
+    int length = strlen(buf);
 
     if (write(1, buf, length) < length)
         return -1;
