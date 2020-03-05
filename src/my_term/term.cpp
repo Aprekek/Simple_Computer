@@ -59,19 +59,3 @@ int Terminal::setBgColor(colors BgColor)
 
     return 0;
 }
-
-// DEMONSTRATE
-
-/*int main()
-{
-    int rows, cols;
-
-    Terminal::clearScreen();
-    Terminal::setBgColor(Terminal::BG_RED);
-    Terminal::setFgColor(Terminal::FG_GREEN);
-    Terminal::getScreanSize(rows, cols);
-    std::cout << "rows: " << rows;
-    std::cout << "\ncols: " << cols << std::endl;
-    Terminal::gotoXY(10, 50);
-    return 0;
-}*/
