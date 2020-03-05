@@ -15,7 +15,7 @@ int Terminal::gotoXY(int x, int y)
 {
     char buf[20];
     sprintf(buf, "\E[%d;%dH", x, y);
-    size_t length = strlen(buf);
+    int length = strlen(buf);
 
     if (write(1, buf, length) < length)
         return -1;
@@ -61,8 +61,8 @@ int Terminal::setBgColor(colors BgColor)
 }
 
 // DEMONSTRATE
-/*
-int main()
+
+/*int main()
 {
     int rows, cols;
 
