@@ -142,17 +142,41 @@ int SimpleComputer::commandDecode(const int &value, int &command, int &operand)
         return WRONG_COMAND;
     }
 
-    operand = command = 0x0;
-    operand |= value & 0x7f;
-    command |= (value >> 7) & 0x7f;
+    int tmpCommand, tmpOperand;
 
-    if ((command < 0x10) || (command > 0x11 && command < 0x20) || (command > 0x21 && command < 0x30) ||
-        (command > 0x33 && command < 0x40) || (command > 0x43 && command < 0x51) || (command > 0x76) ||
-        (operand > 0x7f))
+    tmpOperand = tmpCommand = 0x0;
+    tmpOperand |= value & 0x7f;
+    tmpCommand |= (value >> 7) & 0x7f;
+
+    if ((tmpCommand < 0x10) || (tmpCommand > 0x11 && tmpCommand < 0x20) || (tmpCommand > 0x21 && tmpCommand < 0x30) ||
+        (tmpCommand > 0x33 && tmpCommand < 0x40) || (tmpCommand > 0x43 && tmpCommand < 0x51) || (tmpCommand > 0x76) ||
+        (tmpOperand > 0x7f))
     {
         regSet(WRONG_COMAND, 1);
         return WRONG_COMAND;
     }
 
+    command = tmpCommand;
+    operand = tmpOperand;
+
     return 1;
 }
+
+/*
+int main()
+{
+    int command = 0x51;
+    int operand = 0x33;
+    int value = 0x0;
+    SimpleComputer *inst = SimpleComputer::getInstance();
+    inst->commandEncode(command, operand, value);
+    std::cout << std::hex << value << std::endl;
+    command = operand = 0x0;
+    value = 1238;
+    if (!inst->commandDecode(value, command, operand))
+        std::cout << "Error\n";
+    std::cout << command << std::endl
+              << operand << std::endl;
+
+    return 0;
+}*/
