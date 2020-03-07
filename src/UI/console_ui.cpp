@@ -16,7 +16,7 @@ int _UI_::initUI(Terminal::colors bgColor, Terminal::colors fgColor) const
     return 0;
 };
 
-void _UI_::drawUI() const { return 0; };
+void _UI_::drawUI() const {};
 
 _UI_ *_UI_::getInstance()
 {
