@@ -16,7 +16,7 @@ protected:
 
 public:
     virtual int initUI(Terminal::colors bgColor, Terminal::colors fgColor) const;
-    virtual int drawUI() const;
+    virtual void drawUI() const;
 
     static _UI_ *getInstance();
     static void free();
@@ -29,10 +29,11 @@ protected:
 
     s_computerUI();
     virtual ~s_computerUI() {}
+    void drawMemory() const;
 
 public:
     static _UI_ *getInstance();
-    int drawUI() const override;
+    void drawUI() const override;
 };
 
 #endif

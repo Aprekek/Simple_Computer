@@ -4,15 +4,15 @@ SimpleComputer *SimpleComputer::instance = 0;
 
 SimpleComputer::SimpleComputer()
 {
-    memmory = new int[MEM_SIZE];
-    if (memmory != nullptr)
+    memory = new int[MEM_SIZE];
+    if (memory != nullptr)
     {
         memInit();
         regInit();
     }
     else
     {
-        std::cout << "Cannoy allocate memmory (SimpleComputer <memmory>)\n";
+        std::cout << "Cannoy allocate memory (SimpleComputer <memory>)\n";
         exit(EXIT_FAILURE);
     }
 }
@@ -26,7 +26,7 @@ SimpleComputer *SimpleComputer::getInstance()
     return instance;
 }
 
-int SimpleComputer::memmorySet(const size_t &adress, const int &value)
+int SimpleComputer::memorySet(const size_t &adress, const int &value)
 {
     if (adress >= MEM_SIZE)
     {
@@ -34,11 +34,11 @@ int SimpleComputer::memmorySet(const size_t &adress, const int &value)
         return 0;
     }
 
-    memmory[adress] = value;
+    memory[adress] = value;
     return 1;
 }
 
-int SimpleComputer::memmoryGet(const size_t &adress, int &value)
+int SimpleComputer::memoryGet(const size_t &adress, int &value)
 {
     if (adress >= MEM_SIZE)
     {
@@ -46,11 +46,11 @@ int SimpleComputer::memmoryGet(const size_t &adress, int &value)
         return 0;
     }
 
-    value = memmory[adress];
+    value = memory[adress];
     return 1;
 }
 
-int SimpleComputer::memmorySave(const std::string &fileName)
+int SimpleComputer::memorySave(const std::string &fileName)
 {
     std::ofstream file(fileName, std::ios::binary);
     if (!file.is_open())
@@ -59,12 +59,12 @@ int SimpleComputer::memmorySave(const std::string &fileName)
         return 0;
     }
 
-    file.write((char *)memmory, MEM_SIZE * sizeof(int));
+    file.write((char *)memory, MEM_SIZE * sizeof(int));
 
     return 1;
 }
 
-int SimpleComputer::memmoryLoad(const std::string &fileName)
+int SimpleComputer::memoryLoad(const std::string &fileName)
 {
     std::ifstream file(fileName, std::ios::binary);
     if (!file.is_open())
@@ -73,7 +73,7 @@ int SimpleComputer::memmoryLoad(const std::string &fileName)
         return 0;
     }
 
-    file.read((char *)memmory, MEM_SIZE * sizeof(int));
+    file.read((char *)memory, MEM_SIZE * sizeof(int));
 
     return 1;
 }
@@ -81,7 +81,7 @@ int SimpleComputer::memmoryLoad(const std::string &fileName)
 void SimpleComputer::memInit()
 {
     for (size_t i = 0; i < MEM_SIZE; i++)
-        memmory[i] = 0;
+        memory[i] = 0;
 }
 
 void SimpleComputer::regInit()

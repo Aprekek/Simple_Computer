@@ -16,7 +16,7 @@ int _UI_::initUI(Terminal::colors bgColor, Terminal::colors fgColor) const
     return 0;
 };
 
-int _UI_::drawUI() const { return 0; };
+void _UI_::drawUI() const { return 0; };
 
 _UI_ *_UI_::getInstance()
 {
@@ -57,20 +57,24 @@ _UI_ *s_computerUI::getInstance()
     return instance;
 };
 
-int s_computerUI::drawUI() const
+void s_computerUI::drawMemory() const
 {
     int value;
     char buf[10];
-    for (size_t i = 1; i <= 10; ++i)
+    for (size_t i = 0; i < 10; ++i)
     {
         for (size_t j = 0; j < 10; ++j)
         {
-            Terminal::gotoXY(i, j * 7 + 1);
-            computer->memmoryGet(10 * i + j, value);
+            Terminal::gotoXY(i + 1, j * 7 + 1);
+            computer->memoryGet(10 * i + j, value);
             sprintf(buf, "+%04d", value);
             write(1, buf, strlen(buf));
         }
     }
     Terminal::gotoXY(11, 0);
-    return 0;
+}
+
+void s_computerUI::drawUI() const
+{
+    drawMemory();
 }
