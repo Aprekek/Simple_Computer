@@ -19,3 +19,24 @@ int AltTermMode::bigChCode[19][2] = {{0x4242423C, 0x3C424242},  // 0
                                      {0x7E181800, 0x0018187E},  // +
                                      {0x00000000, 0x00000000},  //
                                      {0x00181800, 0x00181800}}; // :
+AltTermMode::AltTermMode(){};
+AltTermMode::~AltTermMode(){};
+
+int AltTermMode::printA(char *str)
+{
+    write(1, "\E(0", 3);
+
+    int len = strlen(str);
+    if (write(1, str, len) < len)
+        return 1;
+
+    write(1, "\E(B", 3);
+    return 0;
+}
+
+int AltTermMode::printBox(int x1, int y1, int x2, int y2){};
+int AltTermMode::printBigChar(int *codeBigCh, int x, int y,
+                              Terminal::colors bgColor, Terminal::colors fgColor){};
+int AltTermMode::getBigCharPos(int *codeBigCh, int x, int y, int &value){};
+int AltTermMode::bigCgarWrite(int fd, int *codeBigCh, int count){};
+int AltTermMode::bigCharRead(int fd, int *codeBigCh, int need_count, int &count){};
