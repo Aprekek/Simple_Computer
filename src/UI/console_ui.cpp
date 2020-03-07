@@ -42,8 +42,8 @@ void _UI_::free()
 //___________S_COMPUTERUI__________
 s_computerUI::s_computerUI() : _UI_::_UI_()
 {
-    manager = SimpleComputer::getInstance();
-    manager->init();
+    computer = SimpleComputer::getInstance();
+    computer->init();
 };
 
 _UI_ *s_computerUI::getInstance()
@@ -66,7 +66,7 @@ int s_computerUI::drawUI() const
         for (size_t j = 0; j < 10; ++j)
         {
             Terminal::gotoXY(i, j * 7 + 1);
-            manager->memmoryGet(10 * i + j, value);
+            computer->memmoryGet(10 * i + j, value);
             sprintf(buf, "+%04d", value);
             write(1, buf, strlen(buf));
         }

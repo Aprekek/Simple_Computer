@@ -25,7 +25,7 @@ public:
 class s_computerUI : public _UI_
 {
 protected:
-    SimpleComputer *manager;
+    SimpleComputer *computer;
 
     s_computerUI();
     virtual ~s_computerUI() {}
