@@ -7,12 +7,10 @@ int _UI_::value = 0;
 _UI_::_UI_(){};
 _UI_::~_UI_(){};
 
-int _UI_::initUI(Terminal::colors bgColor, Terminal::colors fgColor) const
+int _UI_::initUI(Terminal::colors bgColor, Terminal::colors fgColor)
 {
-    if (Terminal::setBgColor(bgColor) != 0 ||
-        Terminal::setFgColor(fgColor) != 0)
-        return -1;
-
+    bg = bgColor;
+    fg = fgColor;
     return 0;
 };
 
@@ -59,22 +57,28 @@ _UI_ *s_computerUI::getInstance()
 
 void s_computerUI::drawMemory() const
 {
+    Terminal::setColors(fg, bg);
+
     int value;
     char buf[10];
     for (size_t i = 0; i < 10; ++i)
     {
         for (size_t j = 0; j < 10; ++j)
         {
-            Terminal::gotoXY(i + 1, j * 7 + 1);
+            Terminal::gotoXY(i + 2, j * 7 + 2);
             computer->memoryGet(10 * i + j, value);
             sprintf(buf, "+%04d", value);
             write(1, buf, strlen(buf));
         }
     }
-    Terminal::gotoXY(11, 0);
+
+    Terminal::setColors(Terminal::FG_DEFAULT, Terminal::BG_DEFAULT);
 }
 
 void s_computerUI::drawUI() const
 {
+    Terminal::clearScreen();
     drawMemory();
+    AltTermMode::printBox(1, 1, 70, 12);
+    Terminal::gotoXY(13, 0); // delete
 }

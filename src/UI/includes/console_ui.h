@@ -4,18 +4,21 @@
 #include <iostream>
 #include "../../my_term/includes/term.h"
 #include "../../my_simple_computer/includes/mySimpleComputer.h"
+#include "../../big_chars/inclides/alt_charset_mode.h"
 
 class _UI_
 {
 protected:
     static _UI_ *instance;
     static int value;
+    Terminal::colors bg;
+    Terminal::colors fg;
 
     _UI_();
     virtual ~_UI_();
 
 public:
-    virtual int initUI(Terminal::colors bgColor, Terminal::colors fgColor) const;
+    virtual int initUI(Terminal::colors bgColor, Terminal::colors fgColor);
     virtual void drawUI() const;
 
     static _UI_ *getInstance();

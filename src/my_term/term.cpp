@@ -59,3 +59,11 @@ int Terminal::setBgColor(colors BgColor)
 
     return 0;
 }
+
+int Terminal::setColors(colors bgColor, colors fgColor)
+{
+    if (setBgColor(bgColor) != 0 || setFgColor(fgColor) != 0)
+        return -1;
+
+    return 0;
+}

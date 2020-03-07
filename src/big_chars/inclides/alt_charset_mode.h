@@ -6,17 +6,24 @@
 
 #include "../../my_term/includes/term.h"
 
+#define BC_TOP_L "l"
+#define BC_BOT_L "m"
+#define BC_TOP_R "k"
+#define BC_BOT_R "j"
+#define BC_HORIZ "q"
+#define BC_VERT "x"
+
 class AltTermMode
 {
 protected:
-    static int bigChCode[TTL_SMBLS][PARTS];
-
     AltTermMode();
     virtual ~AltTermMode();
 
 public:
-    static int printA(char *str);
-    static int printBox(int x1, int y1, int x2, int y2);
+    static const int bigChCode[TTL_SMBLS][PARTS];
+    static int printString(char *str, int count);
+    static int printChar(char ch, size_t count);
+    static int printBox(int x, int y, int width, int height);
     static int printBigChar(int *codeBigCh, int x, int y,
                             Terminal::colors bgColor, Terminal::colors fgColor);
     static int getBigCharPos(int *codeBigCh, int x, int y, int &value);
