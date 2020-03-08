@@ -24,11 +24,11 @@ public:
     static int printString(char *str, int count = 1);
     static int printChar(char ch, size_t count);
     static int printBox(int x, int y, int width, int height);
-    static int printBigChar(int *codeBigCh, int x, int y,
+    static int printBigChar(const int *codeBigCh, int x, int y,
                             Terminal::colors bgColor, Terminal::colors fgColor);
-    static int getBigCharPos(int *codeBigCh, int x, int y, int &value);
-    static int bigCgarWrite(int fd, int *codeBigCh, int count);
-    static int bigCharRead(int fd, int *codeBigCh, int need_count, int &count);
+    static int getBigCharPos(const int *codeBigCh, int x, int y, int &value);
+    static int bigCgarWrite(int fd, const int *codeBigCh, int count);
+    static int bigCharRead(int fd, const int *codeBigCh, int need_count, int &count);
 };
 
 #endif

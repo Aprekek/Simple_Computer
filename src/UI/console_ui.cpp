@@ -55,7 +55,7 @@ _UI_ *s_computerUI::getInstance()
     return instance;
 };
 
-void s_computerUI::drawMemory() const
+void s_computerUI::printMemory() const
 {
     Terminal::setColors(fg, bg);
 
@@ -108,6 +108,6 @@ void s_computerUI::drawUI() const
 {
     Terminal::clearScreen();
     drawBoxes();
-    drawMemory();
+    printMemory();
     Terminal::gotoXY(40, 0); // delete
 }

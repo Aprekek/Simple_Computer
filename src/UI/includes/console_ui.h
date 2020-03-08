@@ -33,7 +33,7 @@ protected:
     s_computerUI();
     virtual ~s_computerUI() {}
 
-    void drawMemory() const;
+    void printMemory() const;
     void drawBoxes() const;
     void printNames() const;
 

@@ -73,8 +73,35 @@ int AltTermMode::printBox(int x, int y, int width, int height)
     }
 }
 
-int AltTermMode::printBigChar(int *codeBigCh, int x, int y,
-                              Terminal::colors bgColor, Terminal::colors fgColor){};
-int AltTermMode::getBigCharPos(int *codeBigCh, int x, int y, int &value){};
-int AltTermMode::bigCgarWrite(int fd, int *codeBigCh, int count){};
-int AltTermMode::bigCharRead(int fd, int *codeBigCh, int need_count, int &count){};
+int AltTermMode::getBigCharPos(const int *codeBigCh, int x, int y, int &value)
+{
+    if (x < 0 || x > 7 || y < 0 || y > 7)
+        return 1;
+
+    unsigned short part = (x < 4) ? 0 : 1;
+    value = codeBigCh[part] & (0x1 << (8 * (x % 4) + y));
+}
+
+int AltTermMode::printBigChar(const int *codeBigCh, int x, int y,
+                              Terminal::colors bgColor, Terminal::colors fgColor)
+{
+    int value;
+    Terminal::setColors(bgColor, fgColor);
+
+    for (int i = 0; i < 8; ++i)
+    {
+        for (int j = 0; j < 8; ++j)
+        {
+            getBigCharPos(codeBigCh, i, j, value);
+            Terminal::gotoXY(x + i, y + j);
+            if (value)
+                printString("a");
+            else
+                write(1, " ", sizeof(char));
+        }
+    }
+
+    Terminal::setColors(Terminal::BG_DEFAULT, Terminal::FG_DEFAULT);
+}
+int AltTermMode::bigCgarWrite(int fd, const int *codeBigCh, int count){};
+int AltTermMode::bigCharRead(int fd, const int *codeBigCh, int need_count, int &count){};
