@@ -21,7 +21,7 @@ protected:
 
 public:
     static const int bigChCode[TTL_SMBLS][PARTS];
-    static int printString(char *str, int count);
+    static int printString(char *str, int count = 1);
     static int printChar(char ch, size_t count);
     static int printBox(int x, int y, int width, int height);
     static int printBigChar(int *codeBigCh, int x, int y,

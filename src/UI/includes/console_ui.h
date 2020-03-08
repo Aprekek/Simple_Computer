@@ -35,6 +35,7 @@ protected:
 
     void drawMemory() const;
     void drawBoxes() const;
+    void printNames() const;
 
 public:
     static _UI_ *getInstance();

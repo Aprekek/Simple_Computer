@@ -22,7 +22,7 @@ const int AltTermMode::bigChCode[19][2] = {{0x4242423C, 0x3C424242},  // 0
 AltTermMode::AltTermMode(){};
 AltTermMode::~AltTermMode(){};
 
-int AltTermMode::printString(char *str, int count = 1)
+int AltTermMode::printString(char *str, int count)
 {
     write(1, "\E(0", 3);
 

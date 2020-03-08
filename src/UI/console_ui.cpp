@@ -81,9 +81,27 @@ void s_computerUI::drawBoxes() const
     AltTermMode::printBox(1, 71, 30, 3);   //accumulator box
     AltTermMode::printBox(4, 71, 30, 3);   //instr. counter box
     AltTermMode::printBox(7, 71, 30, 3);   //operation box
-    AltTermMode::printBox(10, 71, 30, 3);  //flag box
+    AltTermMode::printBox(10, 71, 30, 3);  //flags box
     AltTermMode::printBox(13, 1, 50, 10);  //big chars box
     AltTermMode::printBox(13, 51, 50, 10); //key box
+
+    printNames();
+}
+
+void s_computerUI::printNames() const
+{
+    Terminal::gotoXY(1, 31);
+    write(1, " Memory ", 9);
+    Terminal::gotoXY(1, 79);
+    write(1, " Accumulator ", 14);
+    Terminal::gotoXY(4, 75);
+    write(1, " Instruction counter ", 22);
+    Terminal::gotoXY(7, 80);
+    write(1, " Operation ", 12);
+    Terminal::gotoXY(10, 82);
+    write(1, " Flags ", 8);
+    Terminal::gotoXY(13, 72);
+    write(1, " Keys ", 7);
 }
 
 void s_computerUI::drawUI() const
