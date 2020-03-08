@@ -41,7 +41,7 @@ int AltTermMode::printString(char *str, int count)
     return 0;
 }
 
-int AltTermMode::printBox(int x, int y, int width, int height)
+void AltTermMode::printBox(int x, int y, int width, int height)
 {
     int x2 = x + height - 1;
     int y2 = y + width - 1;
@@ -80,10 +80,11 @@ int AltTermMode::getBigCharPos(const int *codeBigCh, int x, int y, int &value)
 
     unsigned short part = (x < 4) ? 0 : 1;
     value = codeBigCh[part] & (0x1 << (8 * (x % 4) + y));
+    return 0;
 }
 
-int AltTermMode::printBigChar(const int *codeBigCh, int x, int y,
-                              Terminal::colors bgColor, Terminal::colors fgColor)
+void AltTermMode::printBigChar(const int *codeBigCh, int x, int y,
+                               Terminal::colors bgColor, Terminal::colors fgColor)
 {
     int value;
     Terminal::setColors(bgColor, fgColor);
@@ -103,5 +104,17 @@ int AltTermMode::printBigChar(const int *codeBigCh, int x, int y,
 
     Terminal::setColors(Terminal::BG_DEFAULT, Terminal::FG_DEFAULT);
 }
-int AltTermMode::bigCgarWrite(int fd, const int *codeBigCh, int count){};
-int AltTermMode::bigCharRead(int fd, const int *codeBigCh, int need_count, int &count){};
+/*int AltTermMode::bigCharWrite(int fd, const int *codeBigCh, int count)
+{
+    for (int i = 0; i < count; ++i)
+    {
+        if (write(fd, codeBigCh, sizeof(int)) == -1)
+            return 1;
+    }
+    return 0;
+}*/
+
+/*int AltTermMode::bigCharRead(int fd, const int *codeBigCh, int need_count, int &count)
+{
+    :
+}*/

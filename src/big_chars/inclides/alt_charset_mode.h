@@ -23,12 +23,12 @@ public:
     static const int bigChCode[TTL_SMBLS][PARTS];
     static int printString(char *str, int count = 1);
     static int printChar(char ch, size_t count);
-    static int printBox(int x, int y, int width, int height);
-    static int printBigChar(const int *codeBigCh, int x, int y,
-                            Terminal::colors bgColor, Terminal::colors fgColor);
+    static void printBox(int x, int y, int width, int height);
+    static void printBigChar(const int *codeBigCh, int x, int y,
+                             Terminal::colors bgColor, Terminal::colors fgColor);
     static int getBigCharPos(const int *codeBigCh, int x, int y, int &value);
-    static int bigCgarWrite(int fd, const int *codeBigCh, int count);
-    static int bigCharRead(int fd, const int *codeBigCh, int need_count, int &count);
+    //static int bigCharWrite(int fd, const int *codeBigCh, int count); ???
+    //static int bigCharRead(int fd, const int *codeBigCh, int need_count, int &count); ???
 };
 
 #endif
