@@ -32,7 +32,9 @@ protected:
 
     s_computerUI();
     virtual ~s_computerUI() {}
+
     void drawMemory() const;
+    void drawBoxes() const;
 
 public:
     static _UI_ *getInstance();

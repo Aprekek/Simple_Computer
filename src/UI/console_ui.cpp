@@ -75,10 +75,21 @@ void s_computerUI::drawMemory() const
     Terminal::setColors(Terminal::FG_DEFAULT, Terminal::BG_DEFAULT);
 }
 
+void s_computerUI::drawBoxes() const
+{
+    AltTermMode::printBox(1, 1, 70, 12);   //memory box
+    AltTermMode::printBox(1, 71, 30, 3);   //accumulator box
+    AltTermMode::printBox(4, 71, 30, 3);   //instr. counter box
+    AltTermMode::printBox(7, 71, 30, 3);   //operation box
+    AltTermMode::printBox(10, 71, 30, 3);  //flag box
+    AltTermMode::printBox(13, 1, 50, 10);  //big chars box
+    AltTermMode::printBox(13, 51, 50, 10); //key box
+}
+
 void s_computerUI::drawUI() const
 {
     Terminal::clearScreen();
+    drawBoxes();
     drawMemory();
-    AltTermMode::printBox(1, 1, 70, 12);
-    Terminal::gotoXY(13, 0); // delete
+    Terminal::gotoXY(40, 0); // delete
 }
