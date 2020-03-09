@@ -86,6 +86,7 @@ void s_computerUI::drawBoxes() const
     AltTermMode::printBox(13, 51, 50, 10); //key box
 
     printNames();
+    printKeys();
 }
 
 void s_computerUI::printNames() const
@@ -104,10 +105,28 @@ void s_computerUI::printNames() const
     write(1, " Keys ", 7);
 }
 
+void s_computerUI::printKeys() const
+{
+    Terminal::gotoXY(14, 52);
+    write(1, "l - load", 9);
+    Terminal::gotoXY(15, 52);
+    write(1, "s - save", 9);
+    Terminal::gotoXY(16, 52);
+    write(1, "r - run", 8);
+    Terminal::gotoXY(17, 52);
+    write(1, "t - step", 9);
+    Terminal::gotoXY(18, 52);
+    write(1, "s - save", 9);
+    Terminal::gotoXY(19, 52);
+    write(1, "f5 - accumulator", 17);
+    Terminal::gotoXY(20, 52);
+    write(1, "f6 - instruction counter", 25);
+}
+
 void s_computerUI::drawUI() const
 {
     Terminal::clearScreen();
     drawBoxes();
     printMemory();
-    Terminal::gotoXY(40, 0); // delete
+    Terminal::gotoXY(23, 0); // delete
 }
