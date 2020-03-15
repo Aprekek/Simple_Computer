@@ -73,7 +73,7 @@ void AltTermMode::printBox(int x, int y, int width, int height)
     }
 }
 
-int AltTermMode::getBigCharPos(const int *codeBigCh, int x, int y, int &value)
+int AltTermMode::getBigCharPos(const int *codeBigCh, int x, int y, bool &value)
 {
     if (x < 0 || x > 7 || y < 0 || y > 7)
         return 1;
@@ -86,7 +86,7 @@ int AltTermMode::getBigCharPos(const int *codeBigCh, int x, int y, int &value)
 void AltTermMode::printBigChar(const int *codeBigCh, int x, int y,
                                Terminal::colors bgColor, Terminal::colors fgColor)
 {
-    int value;
+    bool value;
     Terminal::setColors(bgColor, fgColor);
 
     for (int i = 0; i < 8; ++i)
