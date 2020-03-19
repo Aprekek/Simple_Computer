@@ -3,13 +3,13 @@
 
 #include <iostream>
 #include <unistd.h>
-#include <sys/ioctl.h>
-#include <cstdlib>
-#include <cstring>
+#include <termios.h>
 
 class MyKeyBoard
 {
 private:
+    static struct termios canone;
+
     MyKeyBoard();
     virtual ~MyKeyBoard();
 
@@ -30,10 +30,13 @@ public:
         enter_key
     };
 
+    static int switchRegime(bool regime, bool vtime, bool vmin, bool echo, bool sigint);
+    static int switchToAlt();
+    static int switchToCanon();
+    static void init();
     static int readKey(Keys &key);
     static int termSave();
     static int termRead();
-    static int switchRegime(int regime, int vtime, int vmin, int echo, int sigint);
 };
 
 #endif

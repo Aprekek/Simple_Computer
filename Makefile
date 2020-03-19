@@ -20,7 +20,7 @@ VPATH := $(SOURCE_DIRS)
 all: makeDirs compile
 
 .PHONY : compile
-compile: my_simple_computer my_term big_chars read_key UI launcher
+compile: my_simple_computer my_term big_chars UI launcher #read_key
 
 .PHONY : my_simple_computer
 my_simple_computer:
@@ -28,9 +28,9 @@ my_simple_computer:
 .PHONY : my_term
 my_term:
 	cd src/my_term/ && make all
-.PHONY : read_key
-read_key: 
-	cd src/read_key/ && make all
+#.PHONY : read_key
+#read_key: 
+#	cd src/read_key/ && make all
 .PHONY : UI
 UI:	
 	cd src/UI/ && make all

@@ -5,7 +5,7 @@ INCL_FL := -I
 D_DIR := f_d
 LIB_DIR := a_libr/
 LIBR := $(addprefix -L, $(LIB_DIR))
-LIBS := -lui -lmy_key_board -lbig_chars -lmy_term -ls_computer
+LIBS := -lui -lbig_chars -lmy_term -ls_computer #-lmy_key_board
 
 DIRS := my_simple_computer my_term UI big_chars
 INCLUDE := $(addsuffix /$(D_DIR), $(addprefix $(INCL_FL), $(DIRS)))
