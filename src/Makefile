@@ -5,9 +5,9 @@ INCL_FL := -I
 D_DIR := f_d
 LIB_DIR := a_libr/
 LIBR := $(addprefix -L, $(LIB_DIR))
-LIBS := -lui -lbig_chars -lmy_term -ls_computer #-lmy_key_board
+LIBS := -lui -lmy_key_board -lbig_chars -lmy_term -ls_computer
 
-DIRS := my_simple_computer my_term UI big_chars
+DIRS := my_simple_computer my_term read_key UI big_chars
 INCLUDE := $(addsuffix /$(D_DIR), $(addprefix $(INCL_FL), $(DIRS)))
 
 .PHONY : all

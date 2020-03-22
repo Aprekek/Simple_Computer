@@ -14,6 +14,7 @@ int _UI_::initUI(Terminal::colors bgColor, Terminal::colors fgColor)
 };
 
 void _UI_::drawUI() const {};
+void _UI_::execute(){};
 
 _UI_ *_UI_::getInstance()
 {
@@ -41,6 +42,7 @@ s_computerUI::s_computerUI() : _UI_::_UI_()
 {
     computer = SimpleComputer::getInstance();
     computer->init();
+    instrCounter = 0;
 };
 
 _UI_ *s_computerUI::getInstance()
@@ -71,8 +73,16 @@ void s_computerUI::printMemory() const
         }
     }
 
+    Terminal::setBgColor(Terminal::FG_CYAN);
+    Terminal::gotoXY(instrCounter / 10 + 2, 7 * (instrCounter % 10) + 2);
+    computer->memoryGet(instrCounter, value);
+    sprintf(buf, "+%04d", value);
+    write(1, buf, strlen(buf));
+
     Terminal::setColors(Terminal::FG_DEFAULT, Terminal::BG_DEFAULT);
-}
+};
+
+void s_computerUI::printBigMemory() const {};
 
 void s_computerUI::drawBoxes() const
 {
@@ -86,7 +96,7 @@ void s_computerUI::drawBoxes() const
 
     printNames();
     printKeys();
-}
+};
 
 void s_computerUI::printNames() const
 {
@@ -102,7 +112,7 @@ void s_computerUI::printNames() const
     write(1, " Flags ", 8);
     Terminal::gotoXY(13, 72);
     write(1, " Keys ", 7);
-}
+};
 
 void s_computerUI::printKeys() const
 {
@@ -120,12 +130,87 @@ void s_computerUI::printKeys() const
         Terminal::gotoXY(14 + i, 52);
         write(1, strings[i], strlen(strings[i]));
     }
+};
+
+void s_computerUI::printConditions() const
+{
+    // print accumulator !!!
+
+    Terminal::gotoXY(5, 75);
+    write(1, &instrCounter, sizeof(size_t));
+
+    printMemory();
+    printBigMemory();
+}
+
+void s_computerUI::delegation(MyKeyBoard::Keys key)
+{
+    switch (key)
+    {
+    case MyKeyBoard::up_key:
+        (instrCounter / 10 == 0) ? instrCounter += 90 : instrCounter -= 10;
+        break;
+    case MyKeyBoard::left_key:
+        (instrCounter % 10 == 0) ? instrCounter += 9 : --instrCounter;
+        break;
+    case MyKeyBoard::right_key:
+        (instrCounter % 10 == 9) ? instrCounter -= 9 : ++instrCounter;
+        break;
+    case MyKeyBoard::down_key:
+        (instrCounter / 10 == 9) ? instrCounter -= 90 : instrCounter += 10;
+        break;
+    case MyKeyBoard::enter_key:
+        //change memmory;
+        break;
+    case MyKeyBoard::f5_key:
+        //
+        break;
+    case MyKeyBoard::f6_key:
+        //
+        break;
+    case MyKeyBoard::t_key:
+        //
+        break;
+    case MyKeyBoard::i_key:
+        //
+        break;
+    case MyKeyBoard::r_key:
+        //
+        break;
+    case MyKeyBoard::l_key:
+        //
+        break;
+    case MyKeyBoard::s_key:
+        //
+        break;
+    case MyKeyBoard::q_key:
+        // save settings and exit
+        break;
+    default:
+        break;
+    }
+};
+
+void s_computerUI::execute()
+{
+    MyKeyBoard::Keys key;
+
+    MyKeyBoard::switchToRaw();
+
+    while (key != MyKeyBoard::q_key)
+    {
+        drawUI();
+        MyKeyBoard::readKey(key);
+        delegation(key);
+    }
+
+    MyKeyBoard::switchToCanon();
 }
 
 void s_computerUI::drawUI() const
 {
     Terminal::clearScreen();
     drawBoxes();
-    printMemory();
-    Terminal::gotoXY(23, 0); // delete
-}
+    printConditions();
+    Terminal::gotoXY(23, 0);
+};
