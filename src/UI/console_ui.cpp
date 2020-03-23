@@ -13,7 +13,7 @@ int _UI_::initUI(Terminal::colors bgColor, Terminal::colors fgColor)
     return 0;
 };
 
-void _UI_::drawUI() const {};
+void _UI_::drawUI(){};
 
 void _UI_::execute(){};
 
@@ -57,30 +57,27 @@ _UI_ *s_computerUI::getInstance()
     return instance;
 };
 
-void s_computerUI::printMemory() const
+void s_computerUI::highlightCell(size_t position)
 {
-    Terminal::setColors(fg, bg);
+    static int operand, command, value;
 
-    int value;
-    char buf[10];
+    Terminal::gotoXY(position / 10 + 2, 7 * (position % 10) + 2);
+    computer->memoryGet(instrCounter, value);
+    if (computer->commandDecode(value, command, operand))
+        sprintf(operation, "+%02d:%02d", command, operand);
+    else
+        sprintf(operation, " %04d", value % 4);
+
+    write(1, operation, strlen(operation));
+};
+
+void s_computerUI::printMemory()
+{
     for (size_t i = 0; i < 10; ++i)
     {
         for (size_t j = 0; j < 10; ++j)
-        {
-            Terminal::gotoXY(i + 2, j * 7 + 2);
-            computer->memoryGet(10 * i + j, value);
-            sprintf(buf, "+%04d", value);
-            write(1, buf, strlen(buf));
-        }
+            highlightCell(10 * i + j);
     }
-
-    Terminal::setColors(Terminal::BG_CYAN, Terminal::FG_DEFAULT);
-    Terminal::gotoXY(instrCounter / 10 + 2, 7 * (instrCounter % 10) + 2);
-    computer->memoryGet(instrCounter, value);
-    sprintf(buf, "+%04d", value);
-    write(1, buf, strlen(buf));
-
-    Terminal::setColors(Terminal::FG_DEFAULT, Terminal::BG_DEFAULT);
 }
 
 void s_computerUI::drawBoxes() const
@@ -113,36 +110,44 @@ void s_computerUI::printNames() const
     write(1, " Keys ", 7);
 }
 
-void s_computerUI::printBigMemory() const {};
+void s_computerUI::printBigCell() const {};
 
-void s_computerUI::printConditions() const
+void s_computerUI::printConditions()
 {
     char buf[8];
     short len;
 
-    // print accumulator !!!
+    Terminal::setColors(fg, bg); //print memmory
+    printMemory();
 
-    sprintf(buf, "%ld", instrCounter);
+    Terminal::setColors(Terminal::BG_CYAN, Terminal::FG_DEFAULT); //print cell by current possition
+    highlightCell(instrCounter);
+    printBigCell();
+
+    Terminal::setColors(Terminal::FG_DEFAULT, Terminal::BG_DEFAULT);
+    // print accumulator !!!
+    sprintf(buf, "%ld", instrCounter); //print instruction counter
     len = strlen(buf);
     Terminal::gotoXY(5, 86 - len);
     write(1, buf, len);
 
-    printMemory();
-    //printBigMemory();
+    Terminal::gotoXY(8, 83); //print operation
+    write(1, operation, strlen(operation));
 }
 
 void s_computerUI::printKeys() const
 {
-    char *strings[7] = {
+    char *strings[8] = {
         "l - load",
         "s - save",
         "r - run",
         "t - step",
         "i - reset",
         "f5 - accumulator",
-        "f6 - instruction counter"};
+        "f6 - instruction counter",
+        "q - exit"};
 
-    for (int i = 0; i < 7; ++i)
+    for (int i = 0; i < 8; ++i)
     {
         Terminal::gotoXY(14 + i, 52);
         write(1, strings[i], strlen(strings[i]));
@@ -197,7 +202,7 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
     }
 };
 
-void s_computerUI::drawUI() const
+void s_computerUI::drawUI()
 {
     Terminal::clearScreen();
     drawBoxes();

@@ -18,7 +18,7 @@ protected:
     _UI_();
     virtual ~_UI_();
 
-    virtual void drawUI() const;
+    virtual void drawUI();
 
 public:
     virtual int initUI(Terminal::colors bgColor, Terminal::colors fgColor);
@@ -33,19 +33,21 @@ class s_computerUI : public _UI_
 protected:
     SimpleComputer *computer;
     size_t instrCounter;
+    char operation[8];
 
     s_computerUI();
     virtual ~s_computerUI() {}
 
-    void printMemory() const;
+    void printMemory();
     void drawBoxes() const;
     void printNames() const;
     void printKeys() const;
-    void printBigMemory() const;
-    void printConditions() const;
+    void printBigCell() const;
+    void printConditions();
+    void highlightCell(size_t position);
 
     void delegation(MyKeyBoard::Keys key); //performs functions according to the pressed key
-    void drawUI() const override;
+    void drawUI() override;
 
 public:
     static _UI_ *getInstance();
