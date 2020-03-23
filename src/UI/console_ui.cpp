@@ -71,6 +71,76 @@ void s_computerUI::highlightCell(size_t position)
     write(1, operation, strlen(operation));
 };
 
+void s_computerUI::printBigCell() const
+{
+    int offset;
+
+    for (short i = 0; i < strlen(operation); ++i)
+    {
+        offset = 8 * i + 2 * (i + 1);
+        switch (operation[i])
+        {
+        case '0':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[0], 14, offset);
+            break;
+        case '1':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[1], 14, offset);
+            break;
+        case '2':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[2], 14, offset);
+            break;
+        case '3':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[3], 14, offset);
+            break;
+        case '4':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[4], 14, offset);
+            break;
+        case '5':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[5], 14, offset);
+            break;
+        case '6':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[6], 14, offset);
+            break;
+        case '7':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[7], 14, offset);
+            break;
+        case '8':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[8], 14, offset);
+            break;
+        case '9':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[9], 14, offset);
+            break;
+        case 'a':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[10], 14, offset);
+            break;
+        case 'b':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[11], 14, offset);
+            break;
+        case 'c':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[12], 14, offset);
+            break;
+        case 'd':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[13], 14, offset);
+            break;
+        case 'e':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[14], 14, offset);
+            break;
+        case 'f':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[15], 14, offset);
+            break;
+        case '+':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[16], 14, offset);
+            break;
+        case ' ':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[17], 14, offset);
+            break;
+        case ':':
+            AltTermMode::printBigChar(AltTermMode::bigChCode[18], 14, offset);
+            break;
+        }
+    }
+};
+
 void s_computerUI::printMemory()
 {
     for (size_t i = 0; i < 10; ++i)
@@ -109,8 +179,6 @@ void s_computerUI::printNames() const
     Terminal::gotoXY(13, 72);
     write(1, " Keys ", 7);
 }
-
-void s_computerUI::printBigCell() const {};
 
 void s_computerUI::printConditions()
 {

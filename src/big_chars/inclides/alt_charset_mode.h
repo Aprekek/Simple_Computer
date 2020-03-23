@@ -25,7 +25,8 @@ public:
     static int printChar(char ch, size_t count);
     static void printBox(int x, int y, int width, int height);
     static void printBigChar(const int *codeBigCh, int x, int y,
-                             Terminal::colors bgColor, Terminal::colors fgColor);
+                             Terminal::colors bgColor = Terminal::BG_BLACK,
+                             Terminal::colors fgColor = Terminal::FG_DEFAULT);
     static int getBigCharPos(const int *codeBigCh, int x, int y, bool &value);
     //static int bigCharWrite(int fd, const int *codeBigCh, int count); ???
     //static int bigCharRead(int fd, const int *codeBigCh, int need_count, int &count); ???
