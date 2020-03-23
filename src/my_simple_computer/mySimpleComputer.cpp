@@ -82,6 +82,11 @@ void SimpleComputer::memInit()
 {
     for (size_t i = 0; i < MEM_SIZE; i++)
         memory[i] = 0;
+    // delete !!!
+    memory[10] = 6587;
+    memory[28] = 4438;
+    memory[45] = 7587;
+    //
 }
 
 void SimpleComputer::regInit()

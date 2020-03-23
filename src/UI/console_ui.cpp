@@ -57,27 +57,13 @@ _UI_ *s_computerUI::getInstance()
     return instance;
 };
 
-void s_computerUI::highlightCell(size_t position)
-{
-    static int operand, command, value;
-
-    Terminal::gotoXY(position / 10 + 2, 7 * (position % 10) + 2);
-    computer->memoryGet(instrCounter, value);
-    if (computer->commandDecode(value, command, operand))
-        sprintf(operation, "+%02d:%02d", command, operand);
-    else
-        sprintf(operation, " %04d", value % 4);
-
-    write(1, operation, strlen(operation));
-};
-
 void s_computerUI::printBigCell() const
 {
     int offset;
 
     for (short i = 0; i < strlen(operation); ++i)
     {
-        offset = 8 * i + 2 * (i + 1);
+        offset = 8 * i + 2;
         switch (operation[i])
         {
         case '0':
@@ -141,22 +127,38 @@ void s_computerUI::printBigCell() const
     }
 };
 
+void s_computerUI::highlightCell(size_t position)
+{
+    int operand, command, value;
+
+    Terminal::gotoXY(position / 10 + 2, 7 * (position % 10) + 2);
+    computer->memoryGet(position, value);
+    if (computer->commandDecode(value, command, operand))
+        sprintf(operation, "+%02d:%02d", command, operand);
+    else
+        sprintf(operation, "  %04d", value % 10000);
+
+    write(1, operation, strlen(operation));
+};
+
 void s_computerUI::printMemory()
 {
     for (size_t i = 0; i < 10; ++i)
     {
         for (size_t j = 0; j < 10; ++j)
+        {
             highlightCell(10 * i + j);
+        }
     }
 }
 
 void s_computerUI::drawBoxes() const
 {
-    AltTermMode::printBox(1, 1, 70, 12);   //memory box
-    AltTermMode::printBox(1, 71, 30, 3);   //accumulator box
-    AltTermMode::printBox(4, 71, 30, 3);   //instr. counter box
-    AltTermMode::printBox(7, 71, 30, 3);   //operation box
-    AltTermMode::printBox(10, 71, 30, 3);  //flags box
+    AltTermMode::printBox(1, 1, 71, 12);   //memory box
+    AltTermMode::printBox(1, 72, 30, 3);   //accumulator box
+    AltTermMode::printBox(4, 72, 30, 3);   //instr. counter box
+    AltTermMode::printBox(7, 72, 30, 3);   //operation box
+    AltTermMode::printBox(10, 72, 30, 3);  //flags box
     AltTermMode::printBox(13, 1, 50, 10);  //big chars box
     AltTermMode::printBox(13, 51, 50, 10); //key box
 
@@ -166,17 +168,17 @@ void s_computerUI::drawBoxes() const
 
 void s_computerUI::printNames() const
 {
-    Terminal::gotoXY(1, 31);
+    Terminal::gotoXY(1, 32);
     write(1, " Memory ", 9);
-    Terminal::gotoXY(1, 79);
+    Terminal::gotoXY(1, 80);
     write(1, " Accumulator ", 14);
-    Terminal::gotoXY(4, 75);
+    Terminal::gotoXY(4, 76);
     write(1, " Instruction counter ", 22);
-    Terminal::gotoXY(7, 80);
+    Terminal::gotoXY(7, 81);
     write(1, " Operation ", 12);
-    Terminal::gotoXY(10, 82);
+    Terminal::gotoXY(10, 83);
     write(1, " Flags ", 8);
-    Terminal::gotoXY(13, 72);
+    Terminal::gotoXY(13, 73);
     write(1, " Keys ", 7);
 }
 
@@ -196,11 +198,12 @@ void s_computerUI::printConditions()
     // print accumulator !!!
     sprintf(buf, "%ld", instrCounter); //print instruction counter
     len = strlen(buf);
-    Terminal::gotoXY(5, 86 - len);
+    Terminal::gotoXY(5, 87 - len);
     write(1, buf, len);
 
-    Terminal::gotoXY(8, 83); //print operation
-    write(1, operation, strlen(operation));
+    len = strlen(operation);
+    Terminal::gotoXY(8, 89 - len); //print operation
+    write(1, operation, len);
 }
 
 void s_computerUI::printKeys() const
@@ -217,7 +220,7 @@ void s_computerUI::printKeys() const
 
     for (int i = 0; i < 8; ++i)
     {
-        Terminal::gotoXY(14 + i, 52);
+        Terminal::gotoXY(14 + i, 53);
         write(1, strings[i], strlen(strings[i]));
     }
 }
