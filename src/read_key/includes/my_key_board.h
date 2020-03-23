@@ -29,7 +29,8 @@ public:
         r_key,
         l_key,
         s_key,
-        q_key
+        q_key,
+        err_key
     };
 
     static int switchToRaw(bool vtime = 0, bool vmin = 1, bool echo = 0, bool sigint = 1);

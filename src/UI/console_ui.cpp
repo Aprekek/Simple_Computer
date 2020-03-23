@@ -14,6 +14,7 @@ int _UI_::initUI(Terminal::colors bgColor, Terminal::colors fgColor)
 };
 
 void _UI_::drawUI() const {};
+
 void _UI_::execute(){};
 
 _UI_ *_UI_::getInstance()
@@ -73,16 +74,14 @@ void s_computerUI::printMemory() const
         }
     }
 
-    Terminal::setBgColor(Terminal::FG_CYAN);
+    Terminal::setColors(Terminal::BG_CYAN, Terminal::FG_DEFAULT);
     Terminal::gotoXY(instrCounter / 10 + 2, 7 * (instrCounter % 10) + 2);
     computer->memoryGet(instrCounter, value);
     sprintf(buf, "+%04d", value);
     write(1, buf, strlen(buf));
 
     Terminal::setColors(Terminal::FG_DEFAULT, Terminal::BG_DEFAULT);
-};
-
-void s_computerUI::printBigMemory() const {};
+}
 
 void s_computerUI::drawBoxes() const
 {
@@ -96,7 +95,7 @@ void s_computerUI::drawBoxes() const
 
     printNames();
     printKeys();
-};
+}
 
 void s_computerUI::printNames() const
 {
@@ -112,7 +111,25 @@ void s_computerUI::printNames() const
     write(1, " Flags ", 8);
     Terminal::gotoXY(13, 72);
     write(1, " Keys ", 7);
-};
+}
+
+void s_computerUI::printBigMemory() const {};
+
+void s_computerUI::printConditions() const
+{
+    char buf[8];
+    short len;
+
+    // print accumulator !!!
+
+    sprintf(buf, "%ld", instrCounter);
+    len = strlen(buf);
+    Terminal::gotoXY(5, 86 - len);
+    write(1, buf, len);
+
+    printMemory();
+    //printBigMemory();
+}
 
 void s_computerUI::printKeys() const
 {
@@ -130,17 +147,6 @@ void s_computerUI::printKeys() const
         Terminal::gotoXY(14 + i, 52);
         write(1, strings[i], strlen(strings[i]));
     }
-};
-
-void s_computerUI::printConditions() const
-{
-    // print accumulator !!!
-
-    Terminal::gotoXY(5, 75);
-    write(1, &instrCounter, sizeof(size_t));
-
-    printMemory();
-    printBigMemory();
 }
 
 void s_computerUI::delegation(MyKeyBoard::Keys key)
@@ -191,6 +197,14 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
     }
 };
 
+void s_computerUI::drawUI() const
+{
+    Terminal::clearScreen();
+    drawBoxes();
+    printConditions();
+    Terminal::gotoXY(23, 0); // delete
+}
+
 void s_computerUI::execute()
 {
     MyKeyBoard::Keys key;
@@ -206,11 +220,3 @@ void s_computerUI::execute()
 
     MyKeyBoard::switchToCanon();
 }
-
-void s_computerUI::drawUI() const
-{
-    Terminal::clearScreen();
-    drawBoxes();
-    printConditions();
-    Terminal::gotoXY(23, 0);
-};

@@ -35,7 +35,7 @@ protected:
     size_t instrCounter;
 
     s_computerUI();
-    virtual ~s_computerUI();
+    virtual ~s_computerUI() {}
 
     void printMemory() const;
     void drawBoxes() const;

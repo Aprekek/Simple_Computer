@@ -2,7 +2,7 @@
 SRC_DIR := src/
 LIB_DIR := a_libr/
 
-SOURCE_DIRS := my_simple_computer my_term UI read_key big_chars
+SOURCE_DIRS := my_simple_computer my_term big_chars read_key UI
 SOURCE_DIRS := $(addprefix $(SRC_DIR), $(SOURCE_DIRS))
 
 OBJ_DIR := f_obj
@@ -20,7 +20,7 @@ VPATH := $(SOURCE_DIRS)
 all: makeDirs compile
 
 .PHONY : compile
-compile: my_simple_computer my_term read_key big_chars UI launcher
+compile: my_simple_computer my_term big_chars read_key UI launcher
 
 .PHONY : my_simple_computer
 my_simple_computer:
@@ -29,7 +29,7 @@ my_simple_computer:
 my_term:
 	cd src/my_term/ && make all
 .PHONY : read_key
-read_key: 
+read_key:
 	cd src/read_key/ && make all
 .PHONY : UI
 UI:	
@@ -37,6 +37,7 @@ UI:
 .PHONY : big_chars
 big_chars:
 	cd src/big_chars/ && make all
+
 .PHONY : launcher
 launcher:
 	cd src/ && make all
