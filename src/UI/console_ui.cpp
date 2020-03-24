@@ -82,7 +82,7 @@ void s_computerUI::printBigCell() const
 {
     int offset;
 
-    for (short i = 0; i < strlen(operation); ++i)
+    for (size_t i = 0; i < strlen(operation); ++i)
     {
         offset = 8 * i + 2;
         switch (operation[i])

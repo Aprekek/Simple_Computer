@@ -25,7 +25,10 @@ int MyKeyBoard::switchToCanon()
     termios canone;
     tcgetattr(1, &canone);
     canone.c_lflag |= CANON_FLAGS;
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &canone);
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &canone) != 0)
+        return -1;
+
+    return 0;
 }
 
 int MyKeyBoard::readKey(Keys &key)
