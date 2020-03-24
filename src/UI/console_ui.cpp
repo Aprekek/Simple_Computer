@@ -57,7 +57,7 @@ s_computerUI::s_computerUI() : _UI_::_UI_()
     if (!termLoad())
     {
         Terminal::setFgColor(Terminal::FG_RED);
-        std::cout << "Cannon loading last terminal states. Terminal will be reset\n";
+        std::cout << "Cannot loading last terminal states. Terminal will be reset\n";
         Terminal::setFgColor(Terminal::FG_DEFAULT);
         std::cout << "Press any key!\n";
         MyKeyBoard::switchToRaw();
