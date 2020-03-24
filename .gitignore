@@ -2,6 +2,7 @@
 *~
 *.swp
 *#
+*.d
 launcher
 config/*
 !config/syst
