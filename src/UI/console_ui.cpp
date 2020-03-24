@@ -335,8 +335,11 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
             MyKeyBoard::switchToRaw();
             getchar();
         }
+        else
+            MyKeyBoard::switchToRaw();
         break;
     case MyKeyBoard::s_key:
+        MyKeyBoard::switchToCanon();
         if (!termSave(getPath()))
         {
             std::cout << "\nPress any key!";
@@ -344,6 +347,8 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
             MyKeyBoard::switchToRaw();
             getchar();
         }
+        else
+            MyKeyBoard::switchToRaw();
         break;
     case MyKeyBoard::q_key:
         termSave();
