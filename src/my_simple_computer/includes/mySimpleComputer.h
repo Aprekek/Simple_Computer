@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "../../my_term/includes/term.h"
 
 #define MEM_SIZE 100
 

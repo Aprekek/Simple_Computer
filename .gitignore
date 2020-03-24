@@ -3,3 +3,5 @@
 *.swp
 *#
 launcher
+config/*
+!config/syst

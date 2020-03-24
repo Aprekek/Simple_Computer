@@ -1,4 +1,12 @@
 #include "includes/console_ui.h"
+
+inline void flushSTDIN()
+{
+    std::cin.clear();
+    while (std::cin.get() != '\n')
+        ;
+}
+
 //________UI___________
 _UI_ *_UI_::instance = 0;
 int _UI_::value = 0;
@@ -39,11 +47,14 @@ void _UI_::free()
 };
 
 //___________S_COMPUTERUI__________
+
+const std::string s_computerUI::SYST_PATH = "config/syst";
+
 s_computerUI::s_computerUI() : _UI_::_UI_()
 {
     computer = SimpleComputer::getInstance();
-    computer->init();
     instrCounter = 0;
+    termLoad();
 };
 
 _UI_ *s_computerUI::getInstance()
@@ -182,6 +193,25 @@ void s_computerUI::printNames() const
     write(1, " Keys ", 7);
 }
 
+void s_computerUI::printKeys() const
+{
+    char *strings[8] = {
+        "l - load",
+        "s - save",
+        "r - run",
+        "t - step",
+        "i - reset",
+        "f5 - accumulator",
+        "f6 - instruction counter",
+        "q - exit"};
+
+    for (int i = 0; i < 8; ++i)
+    {
+        Terminal::gotoXY(14 + i, 53);
+        write(1, strings[i], strlen(strings[i]));
+    }
+}
+
 void s_computerUI::printConditions()
 {
     char buf[8];
@@ -204,25 +234,26 @@ void s_computerUI::printConditions()
     len = strlen(operation);
     Terminal::gotoXY(8, 89 - len); //print operation
     write(1, operation, len);
-}
+};
 
-void s_computerUI::printKeys() const
+int s_computerUI::termSave(std::string path)
 {
-    char *strings[8] = {
-        "l - load",
-        "s - save",
-        "r - run",
-        "t - step",
-        "i - reset",
-        "f5 - accumulator",
-        "f6 - instruction counter",
-        "q - exit"};
+    return computer->memorySave(path);
+};
 
-    for (int i = 0; i < 8; ++i)
-    {
-        Terminal::gotoXY(14 + i, 53);
-        write(1, strings[i], strlen(strings[i]));
-    }
+int s_computerUI::termLoad(std::string path)
+{
+    return computer->memoryLoad(path);
+};
+
+std::string s_computerUI::getPath()
+{
+    std::string path;
+    std::cout << "Write path to file: ";
+    std::cin >> path;
+    path.insert(0, "config/");
+
+    return path;
 }
 
 void s_computerUI::delegation(MyKeyBoard::Keys key)
@@ -260,13 +291,26 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
         //
         break;
     case MyKeyBoard::l_key:
-        //
+        MyKeyBoard::switchToCanon();
+        if (!termLoad(getPath()))
+        {
+            std::cout << "Press any key!\n";
+            flushSTDIN();
+            MyKeyBoard::switchToRaw();
+            getchar();
+        }
         break;
     case MyKeyBoard::s_key:
-        //
+        if (!termSave(getPath()))
+        {
+            std::cout << "\nPress any key!";
+            flushSTDIN();
+            MyKeyBoard::switchToRaw();
+            getchar();
+        }
         break;
     case MyKeyBoard::q_key:
-        // save settings and exit
+        termSave();
         break;
     default:
         break;

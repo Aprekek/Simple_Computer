@@ -55,12 +55,16 @@ int SimpleComputer::memorySave(const std::string &fileName)
     std::ofstream file(fileName, std::ios::binary);
     if (!file.is_open())
     {
+        Terminal::setFgColor(Terminal::FG_RED);
         std::cout << "Cannot open file \"" << fileName << "\"\n";
+        Terminal::setFgColor(Terminal::FG_DEFAULT);
         return 0;
     }
 
     file.write((char *)memory, MEM_SIZE * sizeof(int));
+    file.write((char *)&flagRegister, sizeof(uint32_t));
 
+    file.close();
     return 1;
 }
 
@@ -69,12 +73,15 @@ int SimpleComputer::memoryLoad(const std::string &fileName)
     std::ifstream file(fileName, std::ios::binary);
     if (!file.is_open())
     {
+        Terminal::setFgColor(Terminal::FG_RED);
         std::cout << "Cannot open file \"" << fileName << "\"\n";
+        Terminal::setFgColor(Terminal::FG_DEFAULT);
         return 0;
     }
 
     file.read((char *)memory, MEM_SIZE * sizeof(int));
-
+    file.read((char *)&flagRegister, sizeof(uint32_t));
+    file.close();
     return 1;
 }
 
@@ -82,11 +89,6 @@ void SimpleComputer::memInit()
 {
     for (size_t i = 0; i < MEM_SIZE; i++)
         memory[i] = 0;
-    // delete !!!
-    memory[10] = 6587;
-    memory[28] = 4438;
-    memory[45] = 7587;
-    //
 }
 
 void SimpleComputer::regInit()

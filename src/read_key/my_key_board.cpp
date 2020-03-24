@@ -14,7 +14,7 @@ int MyKeyBoard::switchToRaw(bool vtime, bool vmin, bool echo, bool sigint)
     rawMode.c_cc[VTIME] = vtime;
     rawMode.c_cc[VMIN] = vmin;
 
-    if (tcsetattr(1, TCSADRAIN, &rawMode) != 0)
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &rawMode) != 0)
         return -1;
 
     return 0;
@@ -25,7 +25,7 @@ int MyKeyBoard::switchToCanon()
     termios canone;
     tcgetattr(1, &canone);
     canone.c_lflag |= CANON_FLAGS;
-    tcsetattr(STDIN_FILENO, TCSADRAIN, &canone);
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &canone);
 }
 
 int MyKeyBoard::readKey(Keys &key)
@@ -67,6 +67,3 @@ int MyKeyBoard::readKey(Keys &key)
 
     return 0;
 }
-
-int MyKeyBoard::termSave() {}
-int MyKeyBoard::termRead() {}
