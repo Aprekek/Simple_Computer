@@ -155,9 +155,9 @@ void s_computerUI::highlightCell(size_t position)
     Terminal::gotoXY(position / 10 + 2, 7 * (position % 10) + 2);
     computer->memoryGet(position, value);
     if (computer->commandDecode(value, command, operand))
-        sprintf(operation, "+%02d:%02d", command, operand);
+        sprintf(operation, "+%02x:%02x", command, operand);
     else
-        sprintf(operation, "  %04d", value % 10000);
+        sprintf(operation, "  %04x", value % 10000);
 
     write(1, operation, strlen(operation));
 };
@@ -246,7 +246,7 @@ void s_computerUI::printConditions()
     write(1, operation, len);
 };
 
-int s_computerUI::termSave(std::string path)
+int s_computerUI::termSave(std::string path) const
 {
     return computer->memorySave(path);
 };
@@ -256,7 +256,33 @@ int s_computerUI::termLoad(std::string path)
     return computer->memoryLoad(path);
 };
 
-std::string s_computerUI::getPath()
+void s_computerUI::changeCell()
+{
+    int command, operand, value;
+
+    MyKeyBoard::switchToCanon();
+    std::cout << "Command: ";
+    std::cin >> std::hex >> command;
+    std::cout << "Operand: ";
+    std::cin >> std::hex >> operand;
+    if (!computer->commandEncode(command, operand, value))
+    {
+        Terminal::setFgColor(Terminal::FG_RED);
+        std::cout << "Wrong command or operand\n";
+        Terminal::setFgColor(Terminal::FG_DEFAULT);
+        std::cout << "Press any key!\n";
+        MyKeyBoard::switchToRaw();
+        flushSTDIN();
+        getchar();
+    }
+    else
+    {
+        computer->memorySet(instrCounter, value);
+        MyKeyBoard::switchToRaw();
+    }
+};
+
+std::string s_computerUI::getPath() const
 {
     std::string path;
     std::cout << "Write path to file: ";
@@ -283,7 +309,7 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
         (instrCounter / 10 == 9) ? instrCounter -= 90 : instrCounter += 10;
         break;
     case MyKeyBoard::enter_key:
-        //change memmory;
+        changeCell();
         break;
     case MyKeyBoard::f5_key:
         //

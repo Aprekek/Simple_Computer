@@ -39,6 +39,7 @@ protected:
 
     s_computerUI();
     virtual ~s_computerUI(){};
+
     void printMemory();
     void drawBoxes() const;
     void printNames() const;
@@ -47,8 +48,9 @@ protected:
     void printConditions();
     void highlightCell(size_t position);
 
-    std::string getPath();
-    int termSave(std::string path = SYST_PATH);
+    void changeCell();
+    std::string getPath() const;
+    int termSave(std::string path = SYST_PATH) const;
     int termLoad(std::string path = SYST_PATH);
     void delegation(MyKeyBoard::Keys key); //performs functions according to the pressed key
     void drawUI() override;
