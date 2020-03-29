@@ -205,7 +205,7 @@ void s_computerUI::printNames() const
 
 void s_computerUI::printKeys() const
 {
-    char *strings[8] = {
+    char *strings[9] = {
         "l - load",
         "s - save",
         "r - run",
@@ -213,13 +213,17 @@ void s_computerUI::printKeys() const
         "i - reset",
         "f5 - accumulator",
         "f6 - instruction counter",
-        "q - exit"};
+        "q - exit",
+        "enter - select to change"};
 
     for (int i = 0; i < 8; ++i)
     {
         Terminal::gotoXY(14 + i, 53);
         write(1, strings[i], strlen(strings[i]));
     }
+
+    Terminal::gotoXY(14, 74);
+    write(1, strings[8], strlen(strings[8]));
 }
 
 void s_computerUI::printConditions()
