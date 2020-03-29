@@ -4,15 +4,15 @@ SimpleComputer *SimpleComputer::instance = 0;
 
 SimpleComputer::SimpleComputer()
 {
-    memmory = new int[MEM_SIZE];
-    if (memmory != nullptr)
+    memory = new int[MEM_SIZE];
+    if (memory != nullptr)
     {
         memInit();
         regInit();
     }
     else
     {
-        std::cout << "Cannoy allocate memmory (SimpleComputer <memmory>)\n";
+        std::cout << "Cannoy allocate memory (SimpleComputer <memory>)\n";
         exit(EXIT_FAILURE);
     }
 }
@@ -26,7 +26,7 @@ SimpleComputer *SimpleComputer::getInstance()
     return instance;
 }
 
-int SimpleComputer::memmorySet(const size_t &adress, const int &value)
+int SimpleComputer::memorySet(const size_t &adress, const int &value)
 {
     if (adress >= MEM_SIZE)
     {
@@ -34,11 +34,11 @@ int SimpleComputer::memmorySet(const size_t &adress, const int &value)
         return 0;
     }
 
-    memmory[adress] = value;
+    memory[adress] = value;
     return 1;
 }
 
-int SimpleComputer::memmoryGet(const size_t &adress, int &value)
+int SimpleComputer::memoryGet(const size_t &adress, int &value)
 {
     if (adress >= MEM_SIZE)
     {
@@ -46,42 +46,49 @@ int SimpleComputer::memmoryGet(const size_t &adress, int &value)
         return 0;
     }
 
-    value = memmory[adress];
+    value = memory[adress];
     return 1;
 }
 
-int SimpleComputer::memmorySave(const std::string &fileName)
+int SimpleComputer::memorySave(const std::string &fileName)
 {
     std::ofstream file(fileName, std::ios::binary);
     if (!file.is_open())
     {
+        Terminal::setFgColor(Terminal::FG_RED);
         std::cout << "Cannot open file \"" << fileName << "\"\n";
+        Terminal::setFgColor(Terminal::FG_DEFAULT);
         return 0;
     }
 
-    file.write((char *)memmory, MEM_SIZE * sizeof(int));
+    file.write((char *)memory, MEM_SIZE * sizeof(int));
+    file.write((char *)&flagRegister, sizeof(uint32_t));
 
+    file.close();
     return 1;
 }
 
-int SimpleComputer::memmoryLoad(const std::string &fileName)
+int SimpleComputer::memoryLoad(const std::string &fileName)
 {
     std::ifstream file(fileName, std::ios::binary);
     if (!file.is_open())
     {
+        Terminal::setFgColor(Terminal::FG_RED);
         std::cout << "Cannot open file \"" << fileName << "\"\n";
+        Terminal::setFgColor(Terminal::FG_DEFAULT);
         return 0;
     }
 
-    file.read((char *)memmory, MEM_SIZE * sizeof(int));
-
+    file.read((char *)memory, MEM_SIZE * sizeof(int));
+    file.read((char *)&flagRegister, sizeof(uint32_t));
+    file.close();
     return 1;
 }
 
 void SimpleComputer::memInit()
 {
     for (size_t i = 0; i < MEM_SIZE; i++)
-        memmory[i] = 0;
+        memory[i] = 0;
 }
 
 void SimpleComputer::regInit()
@@ -165,14 +172,19 @@ int SimpleComputer::commandDecode(const int &value, int &command, int &operand)
 /*
 int main()
 {
-    int command = 0x51;
-    int operand = 0x33;
-    int value = 0x0;
+    int command, operand, value;
     SimpleComputer *inst = SimpleComputer::getInstance();
-    inst->commandEncode(command, operand, value);
+    std::cout << "Command: ";
+    std::cin >> std::hex >> command;
+    std::cout << "Operand: ";
+    std::cin >> std::hex >> operand;
+    std::cout << command << " " << operand << std::endl;
+    if (!inst->commandEncode(command, operand, value))
+    {
+        std::cout << "Error 1!\n";
+        exit(1);
+    }
     std::cout << std::hex << value << std::endl;
-    command = operand = 0x0;
-    value = 1238;
     if (!inst->commandDecode(value, command, operand))
         std::cout << "Error\n";
     std::cout << command << std::endl

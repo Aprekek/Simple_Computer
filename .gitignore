@@ -2,4 +2,7 @@
 *~
 *.swp
 *#
-main
+*.d
+launcher
+config/*
+!config/syst

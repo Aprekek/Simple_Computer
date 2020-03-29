@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "../../my_term/includes/term.h"
 
 #define MEM_SIZE 100
 
@@ -64,7 +65,7 @@
 class SimpleComputer //Singleton
 {
 private:
-    int *memmory;
+    int *memory;
     uint32_t flagRegister;
 
     static SimpleComputer *instance;
@@ -72,10 +73,10 @@ private:
 
 public:
     static SimpleComputer *getInstance();
-    int memmorySet(const size_t &adress, const int &value);
-    int memmoryGet(const size_t &adress, int &value);
-    int memmorySave(const std::string &fileName);
-    int memmoryLoad(const std::string &fileName);
+    int memorySet(const size_t &adress, const int &value);
+    int memoryGet(const size_t &adress, int &value);
+    int memorySave(const std::string &fileName);
+    int memoryLoad(const std::string &fileName);
     void memInit();
     void regInit();
     void init();

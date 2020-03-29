@@ -40,6 +40,7 @@ public:
     static int getScreanSize(int &rows, int &cols);
     static int setFgColor(colors fgColor);
     static int setBgColor(colors BgColor);
+    static int setColors(colors bgColor, colors fgColor);
 };
 
 #endif

@@ -1,1 +1,4 @@
-Makefile not done yet
+--run from this directory--
+
+run: make all
+clean: make clean
