@@ -33,7 +33,7 @@ public:
         err_key
     };
 
-    static int switchToRaw(bool vtime = 0, bool vmin = 1, bool echo = 0, bool sigint = 1);
+    static int switchToRaw(bool vtime = 0, bool vmin = 1, bool echo = 0, bool isig = 1);
     static int switchToCanon();
     static int readKey(Keys &key);
 };

@@ -3,14 +3,14 @@
 MyKeyBoard::MyKeyBoard(){};
 MyKeyBoard::~MyKeyBoard(){};
 
-int MyKeyBoard::switchToRaw(bool vtime, bool vmin, bool echo, bool sigint)
+int MyKeyBoard::switchToRaw(bool vtime, bool vmin, bool echo, bool isig)
 {
     termios rawMode;
     tcgetattr(1, &rawMode);
 
     rawMode.c_lflag &= ~ICANON;
     (echo) ? rawMode.c_lflag |= ECHO : rawMode.c_lflag &= ~ECHO;
-    (sigint) ? rawMode.c_lflag |= ISIG : rawMode.c_lflag &= ~ISIG;
+    (isig) ? rawMode.c_lflag |= ISIG : rawMode.c_lflag &= ~ISIG;
     rawMode.c_cc[VTIME] = vtime;
     rawMode.c_cc[VMIN] = vmin;
 
