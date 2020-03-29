@@ -35,7 +35,7 @@ public:
 
     static int switchToRaw(bool vtime = 0, bool vmin = 1, bool echo = 0, bool isig = 1);
     static int switchToCanon();
-    static int readKey(Keys &key);
+    static int readKey(Keys &key, bool ifRun);
 };
 
 #endif

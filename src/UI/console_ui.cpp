@@ -49,6 +49,7 @@ void _UI_::free()
 //___________S_COMPUTERUI__________
 
 const std::string s_computerUI::SYST_PATH = "config/syst";
+bool s_computerUI::delayPassed = false;
 
 s_computerUI::s_computerUI() : _UI_::_UI_()
 {
@@ -68,6 +69,7 @@ s_computerUI::s_computerUI() : _UI_::_UI_()
 
 void s_computerUI::reset()
 {
+    termRun = false;
     accumulator = instrCounter = 0;
     sprintf(operation, "%04", 0);
     computer->init();
@@ -336,11 +338,53 @@ void s_computerUI::changeInstrCntr()
     MyKeyBoard::switchToRaw();
 };
 
+void s_computerUI::delayCheck()
+{
+    if (delayPassed)
+    {
+        delayPassed = false;
+        step();
+    }
+}
+
 inline void s_computerUI::step()
 {
     ++instrCounter;
     instrCounter %= 100;
+};
+
+void s_computerUI::alarmSwtchOff(int sig)
+{
+    alarm(0);
 }
+
+void s_computerUI::signalHandler(int sig)
+{
+    delayPassed = true;
+}
+
+void s_computerUI::timerIncr()
+{
+    static struct itimerval nval, oval;
+
+    if (termRun)
+    {
+        signal(SIGUSR1, alarmSwtchOff);
+        raise(SIGUSR1);
+        termRun = 0;
+        computer->regSet(IGNR_CLOCK_PULSES, 1);
+    }
+    else
+    {
+        termRun = 1;
+        signal(SIGALRM, signalHandler);
+        nval.it_interval.tv_sec = 1;
+        nval.it_interval.tv_usec = 0;
+        nval.it_value.tv_sec = 1;
+        nval.it_value.tv_usec = 0;
+        setitimer(ITIMER_REAL, &nval, &oval);
+    }
+};
 
 std::string s_computerUI::getPath() const
 {
@@ -350,7 +394,7 @@ std::string s_computerUI::getPath() const
     path.insert(0, "config/");
 
     return path;
-}
+};
 
 void s_computerUI::delegation(MyKeyBoard::Keys key)
 {
@@ -384,7 +428,7 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
         reset();
         break;
     case MyKeyBoard::r_key:
-
+        timerIncr();
         break;
     case MyKeyBoard::l_key:
         MyKeyBoard::switchToCanon();
@@ -423,7 +467,7 @@ void s_computerUI::drawUI()
     Terminal::clearScreen();
     drawBoxes();
     printConditions();
-    Terminal::gotoXY(23, 0); // delete
+    Terminal::gotoXY(23, 0);
 }
 
 void s_computerUI::execute()
@@ -434,8 +478,11 @@ void s_computerUI::execute()
 
     while (key != MyKeyBoard::q_key)
     {
+        key = MyKeyBoard::err_key;
         drawUI();
-        MyKeyBoard::readKey(key);
+        MyKeyBoard::readKey(key, termRun);
+        if (termRun)
+            delayCheck();
         delegation(key);
     }
 

@@ -4,6 +4,8 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <signal.h>
+#include <sys/time.h>
 #include "../../my_term/includes/term.h"
 #include "../../my_simple_computer/includes/mySimpleComputer.h"
 #include "../../big_chars/inclides/alt_charset_mode.h"
@@ -34,15 +36,26 @@ class s_computerUI : public _UI_
 {
 protected:
     SimpleComputer *computer;
-    size_t instrCounter;
-    size_t accumulator;
     static const std::string SYST_PATH;
+    size_t accumulator;
+    size_t instrCounter;
     char operation[8];
+    bool termRun;
+
+    static bool delayPassed; //auxiliary variable for system calls "signal()",
+                             // under which our "instrCounter" should have changed,
+                             // but they require static functions,
+                             // this variable signals that the delay has passed
+                             // and we can change "instrCounter"
 
     s_computerUI();
     virtual ~s_computerUI(){};
     void reset();
 
+    static void alarmSwtchOff(int sig);
+    static void signalHandler(int sig);
+    void delayCheck();
+    void step();
     void printMemory();
     void drawBoxes() const;
     void printNames() const;
@@ -50,16 +63,17 @@ protected:
     void printBigCell() const;
     void printConditions();
     void highlightCell(size_t position);
-
     void changeCell();
     void changeAccum();
     void changeInstrCntr();
-    inline void step();
+    void timerIncr();
     std::string getPath() const;
     int termSave(std::string path = SYST_PATH) const;
     int termLoad(std::string path = SYST_PATH);
     void delegation(MyKeyBoard::Keys key); //performs functions according to the pressed key
     void drawUI() override;
+
+    friend MyKeyBoard;
 
 public:
     static _UI_ *getInstance();
