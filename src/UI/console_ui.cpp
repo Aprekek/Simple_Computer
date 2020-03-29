@@ -53,7 +53,7 @@ const std::string s_computerUI::SYST_PATH = "config/syst";
 s_computerUI::s_computerUI() : _UI_::_UI_()
 {
     computer = SimpleComputer::getInstance();
-    instrCounter = 0;
+    accumulator = instrCounter = 0;
     if (!termLoad())
     {
         Terminal::setFgColor(Terminal::FG_RED);
@@ -157,7 +157,7 @@ void s_computerUI::highlightCell(size_t position)
     if (computer->commandDecode(value, command, operand))
         sprintf(operation, "+%02x:%02x", command, operand);
     else
-        sprintf(operation, "  %04x", value % 10000);
+        sprintf(operation, "  %04x", value);
 
     write(1, operation, strlen(operation));
 };
@@ -239,10 +239,14 @@ void s_computerUI::printConditions()
     printBigCell();
 
     Terminal::setColors(Terminal::FG_DEFAULT, Terminal::BG_DEFAULT);
-    // print accumulator !!!
     sprintf(buf, "%ld", instrCounter); //print instruction counter
     len = strlen(buf);
     Terminal::gotoXY(5, 87 - len);
+    write(1, buf, len);
+
+    sprintf(buf, "+%04ld", accumulator); //print accumulator
+    len = strlen(buf);
+    Terminal::gotoXY(2, 89 - len);
     write(1, buf, len);
 
     len = strlen(operation);
@@ -286,6 +290,28 @@ void s_computerUI::changeCell()
     }
 };
 
+void s_computerUI::changeAccum()
+{
+    MyKeyBoard::switchToCanon();
+
+    char buf[8];
+    short i = 0;
+
+    std::cout << "Accumulator << ";
+    while (((buf[i] = getchar()) != '\n') && (i < 4))
+        ++i;
+    buf[i] = '\0';
+
+    accumulator = std::stoi(buf);
+
+    MyKeyBoard::switchToRaw();
+};
+
+void s_computerUI::changeInstrCntr()
+{
+    ;
+};
+
 std::string s_computerUI::getPath() const
 {
     std::string path;
@@ -316,7 +342,7 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
         changeCell();
         break;
     case MyKeyBoard::f5_key:
-        //
+        changeAccum();
         break;
     case MyKeyBoard::f6_key:
         //

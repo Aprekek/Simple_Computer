@@ -34,6 +34,7 @@ class s_computerUI : public _UI_
 protected:
     SimpleComputer *computer;
     size_t instrCounter;
+    size_t accumulator;
     static const std::string SYST_PATH;
     char operation[8];
 
@@ -49,6 +50,8 @@ protected:
     void highlightCell(size_t position);
 
     void changeCell();
+    void changeAccum();
+    void changeInstrCntr();
     std::string getPath() const;
     int termSave(std::string path = SYST_PATH) const;
     int termLoad(std::string path = SYST_PATH);
