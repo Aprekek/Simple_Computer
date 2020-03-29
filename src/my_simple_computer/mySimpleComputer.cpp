@@ -168,27 +168,3 @@ int SimpleComputer::commandDecode(const int &value, int &command, int &operand)
 
     return 1;
 }
-
-/*
-int main()
-{
-    int command, operand, value;
-    SimpleComputer *inst = SimpleComputer::getInstance();
-    std::cout << "Command: ";
-    std::cin >> std::hex >> command;
-    std::cout << "Operand: ";
-    std::cin >> std::hex >> operand;
-    std::cout << command << " " << operand << std::endl;
-    if (!inst->commandEncode(command, operand, value))
-    {
-        std::cout << "Error 1!\n";
-        exit(1);
-    }
-    std::cout << std::hex << value << std::endl;
-    if (!inst->commandDecode(value, command, operand))
-        std::cout << "Error\n";
-    std::cout << command << std::endl
-              << operand << std::endl;
-
-    return 0;
-}*/

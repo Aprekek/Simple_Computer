@@ -31,9 +31,10 @@ int MyKeyBoard::switchToCanon()
     return 0;
 }
 
-int MyKeyBoard::readKey(Keys &key)
+int MyKeyBoard::readKey(Keys &key, bool ifRun)
 {
     char buf[8];
+    switchToRaw(ifRun, !ifRun, 0, 1);
     if (read(1, buf, 7) > 0)
     {
         if (strncmp(buf, "\033[A", 3) == 0)
@@ -68,5 +69,6 @@ int MyKeyBoard::readKey(Keys &key)
     else
         return -1;
 
+    switchToRaw();
     return 0;
 }

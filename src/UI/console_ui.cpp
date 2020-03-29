@@ -49,6 +49,7 @@ void _UI_::free()
 //___________S_COMPUTERUI__________
 
 const std::string s_computerUI::SYST_PATH = "config/syst";
+bool s_computerUI::delayPassed = false;
 
 s_computerUI::s_computerUI() : _UI_::_UI_()
 {
@@ -64,12 +65,15 @@ s_computerUI::s_computerUI() : _UI_::_UI_()
 
         reset();
     }
+    else
+        computer->regInit();
 };
 
 void s_computerUI::reset()
 {
+    termRun = false;
     accumulator = instrCounter = 0;
-    sprintf(operation, "%04", 0);
+    sprintf(operation, "%04d", 0);
     computer->init();
 }
 
@@ -161,10 +165,15 @@ void s_computerUI::highlightCell(size_t position)
     Terminal::gotoXY(position / 10 + 2, 7 * (position % 10) + 2);
     computer->memoryGet(position, value);
     if (computer->commandDecode(value, command, operand))
+    {
         sprintf(operation, "+%02x:%02x", command, operand);
+        computer->regSet(WRONG_COMAND, 0);
+    }
     else
+    {
         sprintf(operation, "  %04x", value);
-
+        computer->regSet(WRONG_COMAND, 1);
+    }
     write(1, operation, strlen(operation));
 };
 
@@ -178,6 +187,32 @@ void s_computerUI::printMemory()
         }
     }
 }
+
+void s_computerUI::printFlagReg()
+{
+    static const int begPos = 81;
+    bool value;
+
+    Terminal::gotoXY(11, begPos);
+    computer->regGet(WRONG_COMAND, value);
+    write(1, ((value) ? "E" : "_"), 2);
+
+    Terminal::gotoXY(11, begPos + 2);
+    computer->regGet(IGNR_CLOCK_PULSES, value);
+    write(1, ((value) ? "T" : "_"), 2);
+
+    Terminal::gotoXY(11, begPos + 4);
+    computer->regGet(MEMORY_OVERRUN, value);
+    write(1, ((value) ? "M" : "_"), 2);
+
+    Terminal::gotoXY(11, begPos + 6);
+    computer->regGet(OPERATION_OVERFLOW, value);
+    write(1, ((value) ? "P" : "_"), 2);
+
+    Terminal::gotoXY(11, begPos + 8);
+    computer->regGet(DEVISION_ZERO, value);
+    write(1, ((value) ? "0" : "_"), 2);
+};
 
 void s_computerUI::drawBoxes() const
 {
@@ -245,6 +280,8 @@ void s_computerUI::printConditions()
     printBigCell();
 
     Terminal::setColors(Terminal::FG_DEFAULT, Terminal::BG_DEFAULT);
+    printFlagReg();
+
     sprintf(buf, "%ld", instrCounter); //print instruction counter
     len = strlen(buf);
     Terminal::gotoXY(5, 87 - len);
@@ -336,11 +373,54 @@ void s_computerUI::changeInstrCntr()
     MyKeyBoard::switchToRaw();
 };
 
+void s_computerUI::delayCheck()
+{
+    if (delayPassed)
+    {
+        delayPassed = false;
+        step();
+    }
+}
+
 inline void s_computerUI::step()
 {
     ++instrCounter;
     instrCounter %= 100;
+};
+
+void s_computerUI::alarmSwitchOff(int sig)
+{
+    alarm(0);
 }
+
+void s_computerUI::signalHandler(int sig)
+{
+    delayPassed = true;
+}
+
+void s_computerUI::timerIncr()
+{
+    static struct itimerval nval, oval;
+
+    if (termRun)
+    {
+        signal(SIGUSR1, alarmSwitchOff);
+        raise(SIGUSR1);
+        termRun = 0;
+        computer->regSet(IGNR_CLOCK_PULSES, 1);
+    }
+    else
+    {
+        termRun = 1;
+        computer->regSet(IGNR_CLOCK_PULSES, 0);
+        signal(SIGALRM, signalHandler);
+        nval.it_interval.tv_sec = 1;
+        nval.it_interval.tv_usec = 0;
+        nval.it_value.tv_sec = 1;
+        nval.it_value.tv_usec = 0;
+        setitimer(ITIMER_REAL, &nval, &oval);
+    }
+};
 
 std::string s_computerUI::getPath() const
 {
@@ -350,7 +430,7 @@ std::string s_computerUI::getPath() const
     path.insert(0, "config/");
 
     return path;
-}
+};
 
 void s_computerUI::delegation(MyKeyBoard::Keys key)
 {
@@ -384,7 +464,7 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
         reset();
         break;
     case MyKeyBoard::r_key:
-
+        timerIncr();
         break;
     case MyKeyBoard::l_key:
         MyKeyBoard::switchToCanon();
@@ -423,7 +503,7 @@ void s_computerUI::drawUI()
     Terminal::clearScreen();
     drawBoxes();
     printConditions();
-    Terminal::gotoXY(23, 0); // delete
+    Terminal::gotoXY(23, 0);
 }
 
 void s_computerUI::execute()
@@ -431,11 +511,15 @@ void s_computerUI::execute()
     MyKeyBoard::Keys key;
 
     MyKeyBoard::switchToRaw();
+    computer->regSet(IGNR_CLOCK_PULSES, 1);
 
     while (key != MyKeyBoard::q_key)
     {
+        key = MyKeyBoard::err_key;
         drawUI();
-        MyKeyBoard::readKey(key);
+        MyKeyBoard::readKey(key, termRun);
+        if (termRun)
+            delayCheck();
         delegation(key);
     }
 
