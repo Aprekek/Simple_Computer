@@ -53,6 +53,7 @@ protected:
     void changeCell();
     void changeAccum();
     void changeInstrCntr();
+    inline void step();
     std::string getPath() const;
     int termSave(std::string path = SYST_PATH) const;
     int termLoad(std::string path = SYST_PATH);

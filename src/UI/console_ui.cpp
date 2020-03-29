@@ -330,6 +330,12 @@ void s_computerUI::changeInstrCntr()
     MyKeyBoard::switchToRaw();
 };
 
+inline void s_computerUI::step()
+{
+    ++instrCounter;
+    instrCounter %= 100;
+}
+
 std::string s_computerUI::getPath() const
 {
     std::string path;
@@ -366,7 +372,7 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
         changeInstrCntr();
         break;
     case MyKeyBoard::t_key:
-        //
+        step();
         break;
     case MyKeyBoard::i_key:
         //
