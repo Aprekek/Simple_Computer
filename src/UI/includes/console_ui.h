@@ -57,6 +57,7 @@ protected:
     void delayCheck();
     void step();
     void printMemory();
+    void printFlagReg();
     void drawBoxes() const;
     void printNames() const;
     void printKeys() const;
