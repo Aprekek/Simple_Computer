@@ -53,7 +53,6 @@ const std::string s_computerUI::SYST_PATH = "config/syst";
 s_computerUI::s_computerUI() : _UI_::_UI_()
 {
     computer = SimpleComputer::getInstance();
-    accumulator = instrCounter = 0;
     if (!termLoad())
     {
         Terminal::setFgColor(Terminal::FG_RED);
@@ -63,9 +62,16 @@ s_computerUI::s_computerUI() : _UI_::_UI_()
         MyKeyBoard::switchToRaw();
         getchar();
 
-        computer->init();
+        reset();
     }
 };
+
+void s_computerUI::reset()
+{
+    accumulator = instrCounter = 0;
+    sprintf(operation, "%04", 0);
+    computer->init();
+}
 
 _UI_ *s_computerUI::getInstance()
 {
@@ -375,10 +381,10 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
         step();
         break;
     case MyKeyBoard::i_key:
-        //
+        reset();
         break;
     case MyKeyBoard::r_key:
-        //
+
         break;
     case MyKeyBoard::l_key:
         MyKeyBoard::switchToCanon();

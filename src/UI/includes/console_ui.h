@@ -41,6 +41,7 @@ protected:
 
     s_computerUI();
     virtual ~s_computerUI(){};
+    void reset();
 
     void printMemory();
     void drawBoxes() const;
