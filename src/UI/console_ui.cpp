@@ -294,22 +294,40 @@ void s_computerUI::changeAccum()
 {
     MyKeyBoard::switchToCanon();
 
-    char buf[8];
-    short i = 0;
+    std::string buf;
+    std::string digit;
 
     std::cout << "Accumulator << ";
-    while (((buf[i] = getchar()) != '\n') && (i < 4))
-        ++i;
-    buf[i] = '\0';
+    std::getline(std::cin, buf);
+    std::copy_if(buf.cbegin(), buf.cend(), std::back_inserter(digit), ::isdigit);
 
-    accumulator = std::stoi(buf);
+    if (!digit.empty())
+    {
+        digit.resize(4);
+        accumulator = abs(std::stoi(digit));
+    }
 
     MyKeyBoard::switchToRaw();
 };
 
 void s_computerUI::changeInstrCntr()
 {
-    ;
+    MyKeyBoard::switchToCanon();
+
+    std::string buf;
+    std::string digit;
+
+    std::cout << "Instruction counter << ";
+    std::getline(std::cin, buf);
+    std::copy_if(buf.cbegin(), buf.cend(), std::back_inserter(digit), ::isdigit);
+
+    if (!digit.empty())
+    {
+        digit.resize(2);
+        instrCounter = abs(std::stoi(digit));
+    }
+
+    MyKeyBoard::switchToRaw();
 };
 
 std::string s_computerUI::getPath() const
@@ -345,7 +363,7 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
         changeAccum();
         break;
     case MyKeyBoard::f6_key:
-        //
+        changeInstrCntr();
         break;
     case MyKeyBoard::t_key:
         //

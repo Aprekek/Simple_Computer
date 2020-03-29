@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include "../../my_term/includes/term.h"
 #include "../../my_simple_computer/includes/mySimpleComputer.h"
 #include "../../big_chars/inclides/alt_charset_mode.h"
