@@ -2,3 +2,5 @@
 
 run: make all
 clean: make clean
+
+config/ - the folder from which files are downloaded and saved (specify file names in the program without "config/")

@@ -6,4 +6,3 @@
 launcher
 config/*
 !config/syst
-forMe

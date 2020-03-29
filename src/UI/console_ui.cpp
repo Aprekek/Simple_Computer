@@ -73,7 +73,7 @@ void s_computerUI::reset()
 {
     termRun = false;
     accumulator = instrCounter = 0;
-    sprintf(operation, "%04", 0);
+    sprintf(operation, "%04d", 0);
     computer->init();
 }
 
@@ -388,7 +388,7 @@ inline void s_computerUI::step()
     instrCounter %= 100;
 };
 
-void s_computerUI::alarmSwtchOff(int sig)
+void s_computerUI::alarmSwitchOff(int sig)
 {
     alarm(0);
 }
@@ -404,7 +404,7 @@ void s_computerUI::timerIncr()
 
     if (termRun)
     {
-        signal(SIGUSR1, alarmSwtchOff);
+        signal(SIGUSR1, alarmSwitchOff);
         raise(SIGUSR1);
         termRun = 0;
         computer->regSet(IGNR_CLOCK_PULSES, 1);

@@ -52,7 +52,7 @@ protected:
     virtual ~s_computerUI(){};
     void reset();
 
-    static void alarmSwtchOff(int sig);
+    static void alarmSwitchOff(int sig);
     static void signalHandler(int sig);
     void delayCheck();
     void step();
