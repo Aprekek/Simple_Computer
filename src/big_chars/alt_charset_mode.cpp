@@ -104,17 +104,49 @@ void AltTermMode::printBigChar(const int *codeBigCh, int x, int y,
 
     Terminal::setColors(Terminal::BG_DEFAULT, Terminal::FG_DEFAULT);
 }
-/*int AltTermMode::bigCharWrite(int fd, const int *codeBigCh, int count)
+
+int AltTermMode::bigCharWrite(std::string filePath, const int *codeBigCh, int count)
 {
+    std::ofstream file(filePath, std::ios::binary);
+
+    if (!file.is_open())
+    {
+        Terminal::setFgColor(Terminal::FG_RED);
+        std::cout << "Cannot open file \"" << filePath << "\"\n";
+        Terminal::setFgColor(Terminal::FG_DEFAULT);
+        return -1;
+    }
+
     for (int i = 0; i < count; ++i)
     {
-        if (write(fd, codeBigCh, sizeof(int)) == -1)
-            return 1;
+        file.write((char *)codeBigCh, sizeof(codeBigCh));
     }
-    return 0;
-}*/
 
-/*int AltTermMode::bigCharRead(int fd, const int *codeBigCh, int need_count, int &count)
+    file.close();
+
+    return 0;
+}
+
+int AltTermMode::bigCharRead(std::string filePath, const int *arrBigCH, int need_count, int &count)
 {
-    :
-}*/
+    std::ifstream file(filePath, std::ios::binary);
+
+    if (!file.is_open())
+    {
+        Terminal::setFgColor(Terminal::FG_RED);
+        std::cout << "Cannot open file \"" << filePath << "\"\n";
+        Terminal::setFgColor(Terminal::FG_DEFAULT);
+        return -1;
+    }
+
+    count = 0;
+    for (int i = 0; i < need_count; ++i)
+    {
+        file.read((char *)arrBigCH, sizeof(int) * 2);
+        count++;
+    }
+
+    file.close();
+
+    return 0;
+}

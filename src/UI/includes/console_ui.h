@@ -42,19 +42,12 @@ protected:
     char operation[8];
     bool termRun;
 
-    static bool delayPassed; //auxiliary variable for system calls "signal()",
-                             // under which our "instrCounter" should have changed,
-                             // but they require static functions,
-                             // this variable signals that the delay has passed
-                             // and we can change "instrCounter"
-
     s_computerUI();
     virtual ~s_computerUI(){};
     void reset();
 
     static void alarmSwitchOff(int sig);
     static void signalHandler(int sig);
-    void delayCheck();
     void step();
     void printMemory();
     void printFlagReg();

@@ -49,7 +49,6 @@ void _UI_::free()
 //___________S_COMPUTERUI__________
 
 const std::string s_computerUI::SYST_PATH = "config/syst";
-bool s_computerUI::delayPassed = false;
 
 s_computerUI::s_computerUI() : _UI_::_UI_()
 {
@@ -373,15 +372,6 @@ void s_computerUI::changeInstrCntr()
     MyKeyBoard::switchToRaw();
 };
 
-void s_computerUI::delayCheck()
-{
-    if (delayPassed)
-    {
-        delayPassed = false;
-        step();
-    }
-}
-
 inline void s_computerUI::step()
 {
     ++instrCounter;
@@ -395,7 +385,8 @@ void s_computerUI::alarmSwitchOff(int sig)
 
 void s_computerUI::signalHandler(int sig)
 {
-    delayPassed = true;
+    s_computerUI *inst = (s_computerUI *)getInstance();
+    inst->instrCounter++;
 }
 
 void s_computerUI::timerIncr()
@@ -518,8 +509,6 @@ void s_computerUI::execute()
         key = MyKeyBoard::err_key;
         drawUI();
         MyKeyBoard::readKey(key, termRun);
-        if (termRun)
-            delayCheck();
         delegation(key);
     }
 
