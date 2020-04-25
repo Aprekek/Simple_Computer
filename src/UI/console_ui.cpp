@@ -385,10 +385,10 @@ void s_computerUI::alarmSwitchOff(int sig)
 
 void s_computerUI::signalHandler(int sig)
 {
-    static bool isIgnor;
+    //static bool isIgnor;
     static s_computerUI *inst = (s_computerUI *)getInstance();
-    inst->computer->regGet(IGNR_CLOCK_PULSES, isIgnor);
-    if (isIgnor)
+    //inst->computer->regGet(IGNR_CLOCK_PULSES, isIgnor);
+    if (!inst->termRun)
         return;
     inst->instrCounter++;
 }
@@ -428,9 +428,9 @@ std::string s_computerUI::getPath() const
 
 void s_computerUI::delegation(MyKeyBoard::Keys key)
 {
-    static bool isIgnor;
-    computer->regGet(IGNR_CLOCK_PULSES, isIgnor);
-    if (!isIgnor && key != MyKeyBoard::Keys::r_key)
+    /*static bool isIgnor;
+    computer->regGet(IGNR_CLOCK_PULSES, isIgnor);*/
+    if (termRun && key != MyKeyBoard::Keys::r_key)
         return;
 
     switch (key)
