@@ -67,8 +67,6 @@ protected:
     void delegation(MyKeyBoard::Keys key); //performs functions according to the pressed key
     void drawUI() override;
 
-    friend MyKeyBoard;
-
 public:
     static _UI_ *getInstance();
     void execute() override;
