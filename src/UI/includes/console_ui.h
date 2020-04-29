@@ -44,6 +44,7 @@ protected:
     char operation[8];
     size_t instrCounter;
     int accumulator;
+    static bool delayPassed;
     bool termRun;
 
     friend class CU;
@@ -54,6 +55,7 @@ protected:
 
     static void alarmSwitchOff(int sig);
     static void signalHandler(int sig);
+    void checkDelayPassed();
     void printMemory();
     void printFlagReg();
     void drawBoxes() const;
