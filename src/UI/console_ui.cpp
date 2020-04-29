@@ -311,24 +311,27 @@ void s_computerUI::changeCell()
     int command, operand, value;
 
     MyKeyBoard::switchToCanon();
-    std::cout << "Command: ";
-    std::cin >> std::hex >> command;
-    std::cout << "Operand: ";
-    std::cin >> std::hex >> operand;
-    if (!computer->commandEncode(command, operand, value))
+
+    while (1)
     {
-        Terminal::setFgColor(Terminal::FG_RED);
-        std::cout << "Wrong command or operand\n";
-        Terminal::setFgColor(Terminal::FG_DEFAULT);
-        std::cout << "Press any key!\n";
-        MyKeyBoard::switchToRaw();
-        flushSTDIN();
-        getchar();
-    }
-    else
-    {
-        computer->memorySet(instrCounter, value);
-        MyKeyBoard::switchToRaw();
+        std::cout << "Command: ";
+        std::cin >> std::hex >> command;
+        std::cout << "Operand: ";
+        std::cin >> std::hex >> operand;
+        if (!computer->commandEncode(command, operand, value))
+        {
+            computer->regSet(WRONG_COMAND, 1);
+            Terminal::setFgColor(Terminal::FG_RED);
+            std::cout << "Wrong command or operand\n";
+            Terminal::setFgColor(Terminal::FG_DEFAULT);
+        }
+        else
+        {
+            computer->regSet(WRONG_COMAND, 0);
+            computer->memorySet(instrCounter, value);
+            MyKeyBoard::switchToRaw();
+            break;
+        }
     }
 };
 
@@ -428,8 +431,7 @@ std::string s_computerUI::getPath() const
 
 void s_computerUI::delegation(MyKeyBoard::Keys key)
 {
-    /*static bool isIgnor;
-    computer->regGet(IGNR_CLOCK_PULSES, isIgnor);*/
+    static bool isRunFlag;
     if (termRun && key != MyKeyBoard::Keys::r_key)
         return;
 
@@ -448,7 +450,19 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
         (instrCounter / 10 == 9) ? instrCounter -= 90 : instrCounter += 10;
         break;
     case MyKeyBoard::enter_key:
+        /*if (termRun)
+        {
+            computer->regSet(IGNR_CLOCK_PULSES, 1);
+            termRun = 0;
+            isRunFlag = true;
+        }*/
         changeCell();
+        /*if (isRunFlag)
+        {
+            computer->regSet(IGNR_CLOCK_PULSES, 0);
+            termRun = 1;
+            isRunFlag = false;
+        }*/
         break;
     case MyKeyBoard::f5_key:
         changeAccum();
