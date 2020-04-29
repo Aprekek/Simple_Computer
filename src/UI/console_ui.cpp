@@ -2,14 +2,15 @@
 
 inline void flushSTDIN()
 {
-    std::cin.clear();
-    while (std::cin.get() != '\n')
+    //std::cin.clear();
+    while (getchar() != '\n')
         ;
 }
 
 //________UI___________
 _UI_ *_UI_::instance = 0;
 int _UI_::instValue = 0;
+bool s_computerUI::delayPassed = false;
 
 _UI_::_UI_(){};
 _UI_::~_UI_(){};
@@ -53,7 +54,6 @@ const std::string s_computerUI::SYST_PATH = "config/syst";
 s_computerUI::s_computerUI() : _UI_::_UI_()
 {
     computer = SimpleComputer::getInstance();
-    sComputerCU = new CU();
     if (!termLoad())
     {
         Terminal::setFgColor(Terminal::FG_RED);
@@ -67,6 +67,8 @@ s_computerUI::s_computerUI() : _UI_::_UI_()
     }
     else
         computer->regInit();
+
+    sComputerCU = new CU();
 };
 
 void s_computerUI::reset()
@@ -380,6 +382,27 @@ void s_computerUI::changeInstrCntr()
     MyKeyBoard::switchToRaw();
 };
 
+void s_computerUI::checkDelayPassed()
+{
+    if (delayPassed)
+    {
+        if (sComputerCU->execute() == -1)
+        {
+            timerIncr();
+            computer->regSet(WRONG_COMAND, 1);
+            computer->regSet(IGNR_CLOCK_PULSES, 1);
+            //printFlagReg();
+            Terminal::gotoXY(23, 0);
+            Terminal::setFgColor(Terminal::FG_RED);
+            std::cout << "Wrong command or operand\nPress ENTER to continue" << std::endl;
+            Terminal::setFgColor(Terminal::FG_DEFAULT);
+            flushSTDIN();
+            getchar();
+        }
+        delayPassed = false;
+    }
+}
+
 void s_computerUI::alarmSwitchOff(int sig)
 {
     alarm(0);
@@ -387,11 +410,35 @@ void s_computerUI::alarmSwitchOff(int sig)
 
 void s_computerUI::signalHandler(int sig)
 {
+    delayPassed = true;
+    /*//static bool isRunFlag = false;
     static s_computerUI *inst = (s_computerUI *)getInstance();
     if (!inst->termRun)
         return;
     else
-        inst->sComputerCU->execute();
+    {
+        //inst->sComputerCU->execute();
+        inst->termRun = 0;
+        inst->computer->regSet(IGNR_CLOCK_PULSES, 1);
+        inst->printFlagReg();
+        Terminal::gotoXY(23, 0);
+        //isRunFlag = true;
+
+    if (inst->sComputerCU->execute() == -1)
+    {
+        flushSTDIN();
+        getchar();
+        //isRunFlag = false;
+        return;
+    }
+
+    inst->computer->regSet(IGNR_CLOCK_PULSES, 0);
+        inst->printFlagReg();
+        Terminal::gotoXY(23, 0);
+        //isRunFlag = false;
+    inst->termRun = 1;
+}
+*/
 }
 
 void s_computerUI::timerIncr()
@@ -400,13 +447,14 @@ void s_computerUI::timerIncr()
 
     if (termRun)
     {
-        signal(SIGUSR1, alarmSwitchOff);
         termRun = 0;
+        signal(SIGUSR1, alarmSwitchOff);
+        raise(SIGUSR1);
+        delayPassed = false;
         computer->regSet(IGNR_CLOCK_PULSES, 1);
     }
     else
     {
-        termRun = 1;
         computer->regSet(IGNR_CLOCK_PULSES, 0);
         signal(SIGALRM, signalHandler);
         nval.it_interval.tv_sec = 1;
@@ -414,6 +462,7 @@ void s_computerUI::timerIncr()
         nval.it_value.tv_sec = 1;
         nval.it_value.tv_usec = 0;
         setitimer(ITIMER_REAL, &nval, &oval);
+        termRun = 1;
     }
 };
 
@@ -457,7 +506,13 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
         changeInstrCntr();
         break;
     case MyKeyBoard::t_key:
-        sComputerCU->execute();
+        if (sComputerCU->execute() == -1)
+        {
+            Terminal::setFgColor(Terminal::FG_RED);
+            std::cout << "Wrong command or operand\nPress any key\n";
+            Terminal::setFgColor(Terminal::FG_DEFAULT);
+            getchar();
+        }
         break;
     case MyKeyBoard::i_key:
         reset();
@@ -519,6 +574,7 @@ void s_computerUI::execute()
         drawUI();
         MyKeyBoard::readKey(key, termRun);
         delegation(key);
+        checkDelayPassed();
     }
 
     MyKeyBoard::switchToCanon();
