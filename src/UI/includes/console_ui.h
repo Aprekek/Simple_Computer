@@ -77,4 +77,5 @@ public:
     void execute() override;
 };
 
+inline void flushSTDIN();
 #endif

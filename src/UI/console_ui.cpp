@@ -390,7 +390,8 @@ void s_computerUI::signalHandler(int sig)
     static s_computerUI *inst = (s_computerUI *)getInstance();
     if (!inst->termRun)
         return;
-    inst->sComputerCU->execute();
+    else
+        inst->sComputerCU->execute();
 }
 
 void s_computerUI::timerIncr()
