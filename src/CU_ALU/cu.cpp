@@ -43,32 +43,9 @@ int CU::execute()
         }
         case WRITE:
         {
-            ui->instrCounter = operand;
-            if (ui->termRun)
-            {
-                ui->timerIncr();
-                flushSTDIN();
-            }
-            Terminal::setFgColor(Terminal::FG_BLUE);
-            std::cout << "Programm is finished\nPress enter to continue\n";
-            Terminal::setFgColor(Terminal::FG_DEFAULT);
-            flushSTDIN();
-            getchar();
-            return 0;
-            /*ui->computer->memoryGet(operand, value);
-            Terminal::setFgColor(Terminal::FG_BLUE);
-            //std::cout << "Value: " << std::hex << value << std::dec;
-            // std::cout << "\nPress enter to continue\n";
-            std::cin.sync();
-
-            char ch = getchar();
-            while (ch != '\n' && ch != '\0')
-            {
-                ch = getchar();
-            }
-
-            //Terminal::setFgColor(Terminal::FG_DEFAULT);
-            break;*/
+            ui->computer->memoryGet(operand, value);
+            sprintf(ui->outputAnswer, "%x", value);
+            break;
         }
         case LOAD:
         {

@@ -48,6 +48,7 @@ protected:
     CU *sComputerCU;
     static const std::string SYST_PATH;
     char operation[8];
+    char outputAnswer[8];
     size_t instrCounter;
     int accumulator;
     static bool delayPassed;

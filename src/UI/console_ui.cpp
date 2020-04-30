@@ -284,7 +284,8 @@ void s_computerUI::drawBoxes() const
     AltTermMode::printBox(7, 72, 30, 3);   //operation box
     AltTermMode::printBox(10, 72, 30, 3);  //flags box
     AltTermMode::printBox(13, 1, 50, 10);  //big chars box
-    AltTermMode::printBox(13, 51, 50, 10); //key box
+    AltTermMode::printBox(13, 51, 51, 10); //key box
+    AltTermMode::printBox(23, 84, 18, 3);  //show box
 
     printNames();
     printKeys();
@@ -304,6 +305,8 @@ void s_computerUI::printNames() const
     write(1, " Flags ", 8);
     Terminal::gotoXY(13, 73);
     write(1, " Keys ", 7);
+    Terminal::gotoXY(23, 89);
+    write(1, " Output ", 9);
 }
 
 void s_computerUI::printKeys() const
@@ -360,6 +363,12 @@ void s_computerUI::printConditions()
     len = strlen(operation);
     Terminal::gotoXY(8, 89 - len); //print operation
     write(1, operation, len);
+
+    Terminal::setBgColor(Terminal::BG_YELLOW);
+    len = strlen(outputAnswer);
+    Terminal::gotoXY(24, 93 - (len / 2));
+    write(1, outputAnswer, len);
+    Terminal::setBgColor(Terminal::BG_DEFAULT);
 };
 
 int s_computerUI::termSave(std::string path) const
@@ -401,7 +410,7 @@ void s_computerUI::changeCell()
                     offset += 5;
                     computer->regSet(WRONG_COMAND, 1);
                     printFlagReg();
-                    Terminal::gotoXY(23 + offset, 0);
+                    Terminal::gotoXY(25 + offset, 0);
                     Terminal::setFgColor(Terminal::FG_RED);
                     std::cout << "Wrong command or operand\n";
                     Terminal::setFgColor(Terminal::FG_DEFAULT);
@@ -543,6 +552,7 @@ std::string s_computerUI::getPath() const
 
 void s_computerUI::delegation(MyKeyBoard::Keys key)
 {
+    flushSTDIN();
     if (termRun && key != MyKeyBoard::Keys::r_key)
         return;
 
@@ -621,7 +631,7 @@ void s_computerUI::drawUI()
     Terminal::clearScreen();
     drawBoxes();
     printConditions();
-    Terminal::gotoXY(23, 0);
+    Terminal::gotoXY(25, 0);
 }
 
 void s_computerUI::execute()
