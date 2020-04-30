@@ -13,7 +13,7 @@
 #define WRITE 0x11
 
 #define LOAD 0x20
-#define STOKE 0X21
+#define STORE 0X21
 
 #define ADD 0x30
 #define SUB 0x31

@@ -168,7 +168,7 @@ void s_computerUI::highlightCell(size_t position)
     computer->memoryGet(position, value);
     if (computer->commandDecode(value, command, operand))
     {
-        sprintf(operation, "+%02x:%02x", command, operand);
+        sprintf(operation, "+%02x:%02d", command, operand);
         computer->regSet(WRONG_COMAND, 0);
     }
     else
@@ -289,7 +289,7 @@ void s_computerUI::printConditions()
     Terminal::gotoXY(5, 87 - len);
     write(1, buf, len);
 
-    sprintf(buf, "+%04d", accumulator); //print accumulator
+    sprintf(buf, "+%04x", accumulator); //print accumulator
     len = strlen(buf);
     Terminal::gotoXY(2, 89 - len);
     write(1, buf, len);
@@ -313,33 +313,57 @@ void s_computerUI::changeCell()
 {
     int command, operand, value;
     int offset = 0;
+    int choice;
     MyKeyBoard::switchToCanon();
 
-    do
+    while (true)
     {
-        std::cout << "Command: ";
-        std::cin >> std::hex >> command;
-        std::cout << "Operand: ";
-        std::cin >> std::hex >> operand;
-        if (!computer->commandEncode(command, operand, value))
+        std::cout << "to enter in the form: (\"command\", \"operand\")"
+                  << " or enter just a number, press 1 or 2, respectively: ";
+        std::cin >> choice;
+        if (choice == 1)
         {
-            offset += 3;
-            computer->regSet(WRONG_COMAND, 1);
-            printFlagReg();
-            Terminal::gotoXY(23 + offset, 0);
-            Terminal::setFgColor(Terminal::FG_RED);
-            std::cout << "Wrong command or operand\n";
-            Terminal::setFgColor(Terminal::FG_DEFAULT);
+            while (true)
+            {
+                std::cout << "Command: ";
+                std::cin >> std::hex >> command;
+                std::cout << "Operand: ";
+                std::cin >> std::dec >> operand;
+                if (!computer->commandEncode(command, operand, value))
+                {
+                    offset += 3;
+                    computer->regSet(WRONG_COMAND, 1);
+                    printFlagReg();
+                    Terminal::gotoXY(23 + offset, 0);
+                    Terminal::setFgColor(Terminal::FG_RED);
+                    std::cout << "Wrong command or operand\n";
+                    Terminal::setFgColor(Terminal::FG_DEFAULT);
+                }
+                else
+                {
+                    computer->regSet(WRONG_COMAND, 0);
+                    computer->memorySet(instrCounter, value);
+                    MyKeyBoard::switchToRaw();
+                    return;
+                }
+            }
+        }
+        else if (choice == 2)
+        {
+            std::cout << "Value: ";
+            std::cin >> std::hex >> value;
+            computer->memorySet(instrCounter, value);
+            MyKeyBoard::switchToRaw();
+            return;
         }
         else
         {
-            computer->regSet(WRONG_COMAND, 0);
-            computer->memorySet(instrCounter, value);
-            MyKeyBoard::switchToRaw();
-            break;
+            Terminal::setFgColor(Terminal::FG_RED);
+            std::cout << "Wrong input\n";
+            Terminal::setFgColor(Terminal::FG_DEFAULT);
+            //flushSTDIN();
         }
-        flushSTDIN();
-    } while (1);
+    }
 };
 
 void s_computerUI::changeAccum()
