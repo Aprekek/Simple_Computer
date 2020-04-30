@@ -25,7 +25,7 @@ int CU::execute()
 
     if ((comand >= 0x30 && comand <= 0x33) || comand == 0x61)
     {
-        //alu
+        ALU::execute(comand, operand, ui);
     }
     else
     {

@@ -2,6 +2,7 @@
 #define CU_H
 
 #include "../../UI/includes/console_ui.h"
+#include "alu.h"
 
 class s_computerUI; //redefined because CU is a friend of s_computerUI
 

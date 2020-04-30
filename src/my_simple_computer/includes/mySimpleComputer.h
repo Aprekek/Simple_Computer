@@ -18,7 +18,7 @@
 #define ADD 0x30
 #define SUB 0x31
 #define DIVIDE 0x32
-#define MUD 0x33
+#define MUL 0x33
 
 #define JUMP 0x40
 #define JNEG 0x41

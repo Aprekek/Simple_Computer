@@ -12,7 +12,8 @@
 #include "../../read_key/includes/my_key_board.h"
 #include "../../CU_ALU/includes/cu.h"
 
-class CU; //redefined because CU is a friend of s_computerUI
+class CU;  //redefined because CU is a friend of s_computerUI
+class ALU; //redefined because ALU is a friend of s_computerUI
 
 class _UI_
 {
@@ -48,6 +49,7 @@ protected:
     bool termRun;
 
     friend class CU;
+    friend class ALU;
 
     s_computerUI();
     virtual ~s_computerUI(){};
