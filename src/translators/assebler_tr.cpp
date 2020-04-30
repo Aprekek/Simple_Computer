@@ -201,6 +201,7 @@ int AssemblerTR::translate(std::string fileName)
     if (!file.is_open())
     {
         std::cout << "Cannot open file \"" << fileName << "\"\n";
+        file.close();
         return -1;
     }
 

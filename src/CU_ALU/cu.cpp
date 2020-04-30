@@ -36,20 +36,39 @@ int CU::execute()
             MyKeyBoard::switchToCanon();
             std::cout << "Enter value: ";
             std::cin >> std::hex >> value;
+            std::cout << std::dec; //
             ui->computer->memorySet(operand, value);
             MyKeyBoard::switchToRaw();
             break;
         }
         case WRITE:
         {
-            ui->computer->memoryGet(operand, value);
+            ui->instrCounter = operand;
+            if (ui->termRun)
+            {
+                ui->timerIncr();
+                flushSTDIN();
+            }
             Terminal::setFgColor(Terminal::FG_BLUE);
-            std::cout << "Value: " << std::hex << value << "\nPress enter to continue\n";
+            std::cout << "Programm is finished\nPress enter to continue\n";
             Terminal::setFgColor(Terminal::FG_DEFAULT);
-
             flushSTDIN();
             getchar();
-            break;
+            return 0;
+            /*ui->computer->memoryGet(operand, value);
+            Terminal::setFgColor(Terminal::FG_BLUE);
+            //std::cout << "Value: " << std::hex << value << std::dec;
+            // std::cout << "\nPress enter to continue\n";
+            std::cin.sync();
+
+            char ch = getchar();
+            while (ch != '\n' && ch != '\0')
+            {
+                ch = getchar();
+            }
+
+            //Terminal::setFgColor(Terminal::FG_DEFAULT);
+            break;*/
         }
         case LOAD:
         {
@@ -82,10 +101,14 @@ int CU::execute()
         {
             ui->instrCounter = operand;
             if (ui->termRun)
+            {
                 ui->timerIncr();
+                flushSTDIN();
+            }
             Terminal::setFgColor(Terminal::FG_BLUE);
             std::cout << "Programm is finished\nPress enter to continue\n";
             Terminal::setFgColor(Terminal::FG_DEFAULT);
+            flushSTDIN();
             getchar();
             return 0;
         }

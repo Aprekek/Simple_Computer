@@ -1,18 +1,16 @@
 #include "includes/console_ui.h"
 
-inline void flushSTDIN()
+void flushSTDIN()
 {
-
-    char ch = std::cin.get();
-    if ((ch == '\n') || (ch == '\0'))
+    std::cout << std::dec;
+    std::cin.sync();
+    if (std::cin.rdbuf()->in_avail() == 0)
         return;
-    else
+
+    char ch = getchar();
+    while (ch != '\n' && ch != '\0')
     {
-        do
-        {
-            ch = std::cin.get();
-            std::cout << ch;
-        } while ((ch != '\n') && (ch != '\0') && (ch != EOF));
+        ch = getchar();
     }
 }
 
@@ -115,6 +113,7 @@ int s_computerUI::initRAMfromObjFile(std::string fileName)
 
     {
         std::cout << "Cannot open file \"" << objFileName << "\"\n";
+        file.close();
         return -1;
     }
 
@@ -375,6 +374,9 @@ int s_computerUI::termLoad(std::string path)
 
 void s_computerUI::changeCell()
 {
+    std::cout << "Please press ENTER to continue\n";
+    flushSTDIN();
+
     int command, operand, value;
     int offset = 0;
     int choice;
@@ -383,7 +385,8 @@ void s_computerUI::changeCell()
     while (true)
     {
         std::cout << "to enter in the form: (\"command\", \"operand\")"
-                  << " or enter just a number, press 1 or 2, respectively: ";
+                  << " or enter just a number, press 1 or 2, respectively\n";
+
         std::cin >> choice;
         if (choice == 1)
         {
@@ -395,7 +398,7 @@ void s_computerUI::changeCell()
                 std::cin >> std::dec >> operand;
                 if (!computer->commandEncode(command, operand, value))
                 {
-                    offset += 3;
+                    offset += 5;
                     computer->regSet(WRONG_COMAND, 1);
                     printFlagReg();
                     Terminal::gotoXY(23 + offset, 0);
