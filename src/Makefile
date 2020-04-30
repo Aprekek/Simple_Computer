@@ -1,4 +1,4 @@
-CC := g++
+CC := g++ -g3 -o0
 FLAGS := -Wall
 INCL_FL := -I
 

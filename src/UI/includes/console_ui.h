@@ -10,12 +10,16 @@
 #include "../../my_simple_computer/includes/mySimpleComputer.h"
 #include "../../big_chars/inclides/alt_charset_mode.h"
 #include "../../read_key/includes/my_key_board.h"
+#include "../../CU_ALU/includes/cu.h"
+
+class CU;  //redefined because CU is a friend of s_computerUI
+class ALU; //redefined because ALU is a friend of s_computerUI
 
 class _UI_
 {
 protected:
     static _UI_ *instance;
-    static int value;
+    static int instValue;
     Terminal::colors bg;
     Terminal::colors fg;
 
@@ -36,11 +40,16 @@ class s_computerUI : public _UI_
 {
 protected:
     SimpleComputer *computer;
+    CU *sComputerCU;
     static const std::string SYST_PATH;
-    size_t accumulator;
-    size_t instrCounter;
     char operation[8];
+    size_t instrCounter;
+    int accumulator;
+    static bool delayPassed;
     bool termRun;
+
+    friend class CU;
+    friend class ALU;
 
     s_computerUI();
     virtual ~s_computerUI(){};
@@ -48,7 +57,7 @@ protected:
 
     static void alarmSwitchOff(int sig);
     static void signalHandler(int sig);
-    void step();
+    void checkDelayPassed();
     void printMemory();
     void printFlagReg();
     void drawBoxes() const;
@@ -67,11 +76,10 @@ protected:
     void delegation(MyKeyBoard::Keys key); //performs functions according to the pressed key
     void drawUI() override;
 
-    friend MyKeyBoard;
-
 public:
     static _UI_ *getInstance();
     void execute() override;
 };
 
+inline void flushSTDIN();
 #endif

@@ -2,14 +2,15 @@
 
 inline void flushSTDIN()
 {
-    std::cin.clear();
-    while (std::cin.get() != '\n')
+    //std::cin.clear();
+    while (getchar() != '\n')
         ;
 }
 
 //________UI___________
 _UI_ *_UI_::instance = 0;
-int _UI_::value = 0;
+int _UI_::instValue = 0;
+bool s_computerUI::delayPassed = false;
 
 _UI_::_UI_(){};
 _UI_::~_UI_(){};
@@ -27,7 +28,7 @@ void _UI_::execute(){};
 
 _UI_ *_UI_::getInstance()
 {
-    ++value;
+    ++instValue;
     if (instance == nullptr)
     {
         instance = new _UI_();
@@ -38,11 +39,11 @@ _UI_ *_UI_::getInstance()
 
 void _UI_::free()
 {
-    if (value >= 1)
+    if (instValue >= 1)
     {
-        if (value == 1)
+        if (instValue == 1)
             delete instance;
-        --value;
+        --instValue;
     }
 };
 
@@ -66,6 +67,8 @@ s_computerUI::s_computerUI() : _UI_::_UI_()
     }
     else
         computer->regInit();
+
+    sComputerCU = new CU();
 };
 
 void s_computerUI::reset()
@@ -78,7 +81,7 @@ void s_computerUI::reset()
 
 _UI_ *s_computerUI::getInstance()
 {
-    ++value;
+    ++instValue;
     if (instance == nullptr)
     {
         instance = new s_computerUI();
@@ -165,12 +168,15 @@ void s_computerUI::highlightCell(size_t position)
     computer->memoryGet(position, value);
     if (computer->commandDecode(value, command, operand))
     {
-        sprintf(operation, "+%02x:%02x", command, operand);
+        sprintf(operation, "+%02x:%02d", command, operand);
         computer->regSet(WRONG_COMAND, 0);
     }
     else
     {
-        sprintf(operation, "  %04x", value);
+        if (value < 0)
+            sprintf(operation, " -%04x", abs(value));
+        else
+            sprintf(operation, "  %04x", value);
         computer->regSet(WRONG_COMAND, 1);
     }
     write(1, operation, strlen(operation));
@@ -286,7 +292,10 @@ void s_computerUI::printConditions()
     Terminal::gotoXY(5, 87 - len);
     write(1, buf, len);
 
-    sprintf(buf, "+%04ld", accumulator); //print accumulator
+    if (accumulator < 0)
+        sprintf(buf, "-%04x", abs(accumulator)); //print accumulator
+    else
+        sprintf(buf, "%04x", accumulator);
     len = strlen(buf);
     Terminal::gotoXY(2, 89 - len);
     write(1, buf, len);
@@ -309,26 +318,59 @@ int s_computerUI::termLoad(std::string path)
 void s_computerUI::changeCell()
 {
     int command, operand, value;
-
+    int offset = 0;
+    int choice;
     MyKeyBoard::switchToCanon();
-    std::cout << "Command: ";
-    std::cin >> std::hex >> command;
-    std::cout << "Operand: ";
-    std::cin >> std::hex >> operand;
-    if (!computer->commandEncode(command, operand, value))
+
+    while (true)
     {
-        Terminal::setFgColor(Terminal::FG_RED);
-        std::cout << "Wrong command or operand\n";
-        Terminal::setFgColor(Terminal::FG_DEFAULT);
-        std::cout << "Press any key!\n";
-        MyKeyBoard::switchToRaw();
-        flushSTDIN();
-        getchar();
-    }
-    else
-    {
-        computer->memorySet(instrCounter, value);
-        MyKeyBoard::switchToRaw();
+        std::cout << "to enter in the form: (\"command\", \"operand\")"
+                  << " or enter just a number, press 1 or 2, respectively: ";
+        std::cin >> choice;
+        if (choice == 1)
+        {
+            while (true)
+            {
+                std::cout << "Command: ";
+                std::cin >> std::hex >> command;
+                std::cout << "Operand: ";
+                std::cin >> std::dec >> operand;
+                if (!computer->commandEncode(command, operand, value))
+                {
+                    offset += 3;
+                    computer->regSet(WRONG_COMAND, 1);
+                    printFlagReg();
+                    Terminal::gotoXY(23 + offset, 0);
+                    Terminal::setFgColor(Terminal::FG_RED);
+                    std::cout << "Wrong command or operand\n";
+                    Terminal::setFgColor(Terminal::FG_DEFAULT);
+                }
+                else
+                {
+                    computer->regSet(WRONG_COMAND, 0);
+                    computer->memorySet(instrCounter, value);
+                    MyKeyBoard::switchToRaw();
+                    flushSTDIN();
+                    return;
+                }
+            }
+        }
+        else if (choice == 2)
+        {
+            std::cout << "Value: ";
+            std::cin >> std::hex >> value;
+            computer->memorySet(instrCounter, value);
+            MyKeyBoard::switchToRaw();
+            flushSTDIN();
+            return;
+        }
+        else
+        {
+            Terminal::setFgColor(Terminal::FG_RED);
+            std::cout << "Wrong input\n";
+            Terminal::setFgColor(Terminal::FG_DEFAULT);
+            //flushSTDIN();
+        }
     }
 };
 
@@ -346,7 +388,7 @@ void s_computerUI::changeAccum()
     if (!digit.empty())
     {
         digit.resize(4);
-        accumulator = abs(std::stoi(digit));
+        accumulator = std::stoi(digit);
     }
 
     MyKeyBoard::switchToRaw();
@@ -372,11 +414,26 @@ void s_computerUI::changeInstrCntr()
     MyKeyBoard::switchToRaw();
 };
 
-inline void s_computerUI::step()
+void s_computerUI::checkDelayPassed()
 {
-    ++instrCounter;
-    instrCounter %= 100;
-};
+    if (delayPassed)
+    {
+        if (sComputerCU->execute() == -1)
+        {
+            timerIncr();
+            computer->regSet(WRONG_COMAND, 1);
+            computer->regSet(IGNR_CLOCK_PULSES, 1);
+            //printFlagReg();
+            Terminal::gotoXY(23, 0);
+            Terminal::setFgColor(Terminal::FG_RED);
+            std::cout << "Wrong command or operand\nPress ENTER to continue" << std::endl;
+            Terminal::setFgColor(Terminal::FG_DEFAULT);
+            flushSTDIN();
+            getchar();
+        }
+        delayPassed = false;
+    }
+}
 
 void s_computerUI::alarmSwitchOff(int sig)
 {
@@ -385,8 +442,35 @@ void s_computerUI::alarmSwitchOff(int sig)
 
 void s_computerUI::signalHandler(int sig)
 {
-    s_computerUI *inst = (s_computerUI *)getInstance();
-    inst->instrCounter++;
+    delayPassed = true;
+    /*//static bool isRunFlag = false;
+    static s_computerUI *inst = (s_computerUI *)getInstance();
+    if (!inst->termRun)
+        return;
+    else
+    {
+        //inst->sComputerCU->execute();
+        inst->termRun = 0;
+        inst->computer->regSet(IGNR_CLOCK_PULSES, 1);
+        inst->printFlagReg();
+        Terminal::gotoXY(23, 0);
+        //isRunFlag = true;
+
+    if (inst->sComputerCU->execute() == -1)
+    {
+        flushSTDIN();
+        getchar();
+        //isRunFlag = false;
+        return;
+    }
+
+    inst->computer->regSet(IGNR_CLOCK_PULSES, 0);
+        inst->printFlagReg();
+        Terminal::gotoXY(23, 0);
+        //isRunFlag = false;
+    inst->termRun = 1;
+}
+*/
 }
 
 void s_computerUI::timerIncr()
@@ -395,14 +479,14 @@ void s_computerUI::timerIncr()
 
     if (termRun)
     {
+        termRun = 0;
         signal(SIGUSR1, alarmSwitchOff);
         raise(SIGUSR1);
-        termRun = 0;
+        delayPassed = false;
         computer->regSet(IGNR_CLOCK_PULSES, 1);
     }
     else
     {
-        termRun = 1;
         computer->regSet(IGNR_CLOCK_PULSES, 0);
         signal(SIGALRM, signalHandler);
         nval.it_interval.tv_sec = 1;
@@ -410,6 +494,7 @@ void s_computerUI::timerIncr()
         nval.it_value.tv_sec = 1;
         nval.it_value.tv_usec = 0;
         setitimer(ITIMER_REAL, &nval, &oval);
+        termRun = 1;
     }
 };
 
@@ -425,6 +510,10 @@ std::string s_computerUI::getPath() const
 
 void s_computerUI::delegation(MyKeyBoard::Keys key)
 {
+    static bool isRunFlag;
+    if (termRun && key != MyKeyBoard::Keys::r_key)
+        return;
+
     switch (key)
     {
     case MyKeyBoard::up_key:
@@ -449,7 +538,13 @@ void s_computerUI::delegation(MyKeyBoard::Keys key)
         changeInstrCntr();
         break;
     case MyKeyBoard::t_key:
-        step();
+        if (sComputerCU->execute() == -1)
+        {
+            Terminal::setFgColor(Terminal::FG_RED);
+            std::cout << "Wrong command or operand\nPress any key\n";
+            Terminal::setFgColor(Terminal::FG_DEFAULT);
+            getchar();
+        }
         break;
     case MyKeyBoard::i_key:
         reset();
@@ -499,6 +594,7 @@ void s_computerUI::drawUI()
 
 void s_computerUI::execute()
 {
+    sComputerCU->set(this);
     MyKeyBoard::Keys key;
 
     MyKeyBoard::switchToRaw();
@@ -510,6 +606,7 @@ void s_computerUI::execute()
         drawUI();
         MyKeyBoard::readKey(key, termRun);
         delegation(key);
+        checkDelayPassed();
     }
 
     MyKeyBoard::switchToCanon();

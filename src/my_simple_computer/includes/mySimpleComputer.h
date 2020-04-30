@@ -13,12 +13,12 @@
 #define WRITE 0x11
 
 #define LOAD 0x20
-#define STOKE 0X21
+#define STORE 0X21
 
 #define ADD 0x30
 #define SUB 0x31
 #define DIVIDE 0x32
-#define MUD 0x33
+#define MUL 0x33
 
 #define JUMP 0x40
 #define JNEG 0x41

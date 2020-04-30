@@ -157,7 +157,7 @@ int SimpleComputer::commandDecode(const int &value, int &command, int &operand)
 
     if ((tmpCommand < 0x10) || (tmpCommand > 0x11 && tmpCommand < 0x20) || (tmpCommand > 0x21 && tmpCommand < 0x30) ||
         (tmpCommand > 0x33 && tmpCommand < 0x40) || (tmpCommand > 0x43 && tmpCommand < 0x51) || (tmpCommand > 0x76) ||
-        (tmpOperand > 0x7f))
+        (tmpOperand > 0x63))
     {
         regSet(WRONG_COMAND, 1);
         return WRONG_COMAND;
