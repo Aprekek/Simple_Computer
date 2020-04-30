@@ -2,6 +2,8 @@
 #define CONSOLE_UI
 
 #include <iostream>
+#include <limits>
+#include <sstream>
 #include <fstream>
 #include <algorithm>
 #include <signal.h>
@@ -11,6 +13,9 @@
 #include "../../big_chars/inclides/alt_charset_mode.h"
 #include "../../read_key/includes/my_key_board.h"
 #include "../../CU_ALU/includes/cu.h"
+#include "../../translators/includes/assebler_tr.h"
+
+//std::string sourceFile = "src/assabler.sa"; // !!! delete
 
 class CU;  //redefined because CU is a friend of s_computerUI
 class ALU; //redefined because ALU is a friend of s_computerUI
@@ -54,6 +59,7 @@ protected:
     s_computerUI();
     virtual ~s_computerUI(){};
     void reset();
+    int initRAMfromObjFile(std::string fileName);
 
     static void alarmSwitchOff(int sig);
     static void signalHandler(int sig);
@@ -81,5 +87,5 @@ public:
     void execute() override;
 };
 
-inline void flushSTDIN();
+void flushSTDIN();
 #endif

@@ -4,7 +4,6 @@ std::string AssemblerTR::textString;
 std::array<Node *, 100> AssemblerTR::arrList;
 char AssemblerTR::tempBufer[128] = {0};
 std::fstream AssemblerTR::file;
-int AssemblerTR::semicolonPos = -1;
 int AssemblerTR::offset = 0;
 int AssemblerTR::lineNumber = 0;
 
@@ -42,17 +41,6 @@ int AssemblerTR::translateComand(const std::string &comand)
     return -1;
 }
 
-void AssemblerTR::commentCheck()
-{
-    semicolonPos = 0;
-    std::size_t position = textString.find_first_of(";");
-
-    if (position == std::string::npos)
-        semicolonPos = -1;
-    else
-        semicolonPos += position;
-}
-
 int AssemblerTR::cellValidCheck()
 {
     static std::size_t position1, position2;
@@ -86,7 +74,7 @@ int AssemblerTR::cellValidCheck()
     offset += 2;
     arrList[cell] = new Node;
     arrList[cell]->cellKey = cell;
-    std::cout << arrList[cell]->cellKey << " ";
+    //std::cout << arrList[cell]->cellKey << " ";
 
     return 0;
 }
@@ -122,7 +110,7 @@ int AssemblerTR::comandValidCheck()
     }
     arrList[lineNumber]->comand = hash;
     offset = position2;
-    std::cout << comand << " ";
+    //std::cout << comand << " ";
 
     return 0;
 };
@@ -157,7 +145,7 @@ int AssemblerTR::operandValidCheck()
         }
     }
     arrList[lineNumber]->operand = operand;
-    std::cout << operand << std::endl;
+    //std::cout << operand << std::endl;
     return 0;
 };
 
@@ -167,20 +155,43 @@ int AssemblerTR::validationCheck()
     {
         file.getline((char *)&tempBufer, 128);
         textString = tempBufer;
-        commentCheck();
-        if (semicolonPos == 0)
-            continue;
 
-        if (cellValidCheck() == -1)
-            return -1;
-        if (comandValidCheck() == -1)
-            return -1;
-        if (operandValidCheck() == -1)
-            return -1;
+        if (!textString.empty())
+        {
+            if (cellValidCheck() == -1)
+                return -1;
 
+            if (comandValidCheck() == -1)
+                return -1;
+
+            if (operandValidCheck() == -1)
+                return -1;
+        }
         ++lineNumber;
         offset = 0;
     }
+    return 0;
+}
+
+int AssemblerTR::writeToObjFile(const std::string &fileName)
+{
+    file.close();
+    std::size_t position = fileName.find_last_of(".");
+    std::string objFile = fileName.substr(0, position) + ".o";
+    file.open(objFile, std::ios::out | std::ios::binary);
+
+    if (!file.is_open())
+    {
+        std::cout << "Cannot create \"" << objFile << "\"\n";
+        return -1;
+    }
+
+    for (int i = 0; i < 100; ++i)
+    {
+        if (arrList[i] != nullptr)
+            file.write((char *)(arrList[i]), 12);
+    }
+
     return 0;
 }
 
@@ -189,20 +200,27 @@ int AssemblerTR::translate(std::string fileName)
     file.open(fileName, std::ios::in);
     if (!file.is_open())
     {
-        std::cout << "Cannot open file \"" << fileName << "\"\nPress any key to continue\n";
-        getchar();
+        std::cout << "Cannot open file \"" << fileName << "\"\n";
         return -1;
     }
 
-    //   int cell, comand, operand;
     if (validationCheck() == -1)
+    {
+        file.close();
         return -1;
+    }
+    if (writeToObjFile(fileName) == -1)
+    {
+        file.close();
+        return -1;
+    }
 
+    file.close();
     return 0;
 }
 
-int main()
+/*int main()
 {
     AssemblerTR::translate("assembler.sa");
     return 0;
-}
+}*/

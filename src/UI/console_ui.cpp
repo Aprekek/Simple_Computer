@@ -2,9 +2,18 @@
 
 inline void flushSTDIN()
 {
-    //std::cin.clear();
-    while (getchar() != '\n')
-        ;
+
+    char ch = std::cin.get();
+    if ((ch == '\n') || (ch == '\0'))
+        return;
+    else
+    {
+        do
+        {
+            ch = std::cin.get();
+            std::cout << ch;
+        } while ((ch != '\n') && (ch != '\0') && (ch != EOF));
+    }
 }
 
 //________UI___________
@@ -54,20 +63,26 @@ const std::string s_computerUI::SYST_PATH = "config/syst";
 s_computerUI::s_computerUI() : _UI_::_UI_()
 {
     computer = SimpleComputer::getInstance();
-    if (!termLoad())
+    reset();
+
+    MyKeyBoard::switchToRaw();
+    if (AssemblerTR::translate("config/assembler.sa") == -1)
     {
-        Terminal::setFgColor(Terminal::FG_RED);
-        std::cout << "Cannot loading last terminal states. Terminal will be reset\n";
-        Terminal::setFgColor(Terminal::FG_DEFAULT);
-        std::cout << "Press any key!\n";
-        MyKeyBoard::switchToRaw();
+        std::cout << "Press any key to continue\n";
         getchar();
 
-        reset();
+        computer->memoryLoad(SYST_PATH);
     }
     else
-        computer->regInit();
+    {
+        if (initRAMfromObjFile("config/assembler.sa") == -1)
+        {
+            std::cout << "Press any key to continue\n";
+            getchar();
 
+            computer->memoryLoad(SYST_PATH);
+        }
+    }
     sComputerCU = new CU();
 };
 
@@ -89,6 +104,49 @@ _UI_ *s_computerUI::getInstance()
 
     return instance;
 };
+
+int s_computerUI::initRAMfromObjFile(std::string fileName)
+{
+    std::size_t position = fileName.find_last_of(".");
+    std::string objFileName = fileName.substr(0, position) + ".o";
+    std::fstream file(objFileName, std::ios::in | std::ios::binary);
+
+    if (!file.is_open())
+
+    {
+        std::cout << "Cannot open file \"" << objFileName << "\"\n";
+        return -1;
+    }
+
+    std::array<Node *, 100> arrayList;
+    int value;
+    int i = 0;
+
+    while (!file.eof())
+    {
+        arrayList[i] = new Node;
+        file.read((char *)(arrayList[i]), 12);
+        ++i;
+    }
+    --i;
+
+    for (int j = 0; j < i; ++j)
+    {
+        if (arrayList[j]->comand != 0x01)
+            computer->commandEncode(arrayList[j]->comand, arrayList[j]->operand, value);
+        else
+        {
+
+            std::string number;
+            std::stringstream toOct;
+            toOct << std::oct << abs(arrayList[j]->operand);
+            toOct >> value;
+            if (arrayList[j]->operand < 0)
+                value *= (-1);
+        }
+        computer->memorySet(arrayList[j]->cellKey, value);
+    }
+}
 
 void s_computerUI::printBigCell() const
 {
@@ -443,34 +501,6 @@ void s_computerUI::alarmSwitchOff(int sig)
 void s_computerUI::signalHandler(int sig)
 {
     delayPassed = true;
-    /*//static bool isRunFlag = false;
-    static s_computerUI *inst = (s_computerUI *)getInstance();
-    if (!inst->termRun)
-        return;
-    else
-    {
-        //inst->sComputerCU->execute();
-        inst->termRun = 0;
-        inst->computer->regSet(IGNR_CLOCK_PULSES, 1);
-        inst->printFlagReg();
-        Terminal::gotoXY(23, 0);
-        //isRunFlag = true;
-
-    if (inst->sComputerCU->execute() == -1)
-    {
-        flushSTDIN();
-        getchar();
-        //isRunFlag = false;
-        return;
-    }
-
-    inst->computer->regSet(IGNR_CLOCK_PULSES, 0);
-        inst->printFlagReg();
-        Terminal::gotoXY(23, 0);
-        //isRunFlag = false;
-    inst->termRun = 1;
-}
-*/
 }
 
 void s_computerUI::timerIncr()
@@ -510,7 +540,6 @@ std::string s_computerUI::getPath() const
 
 void s_computerUI::delegation(MyKeyBoard::Keys key)
 {
-    static bool isRunFlag;
     if (termRun && key != MyKeyBoard::Keys::r_key)
         return;
 

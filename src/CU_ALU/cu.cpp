@@ -42,15 +42,12 @@ int CU::execute()
         }
         case WRITE:
         {
-
             ui->computer->memoryGet(operand, value);
             Terminal::setFgColor(Terminal::FG_BLUE);
             std::cout << "Value: " << std::hex << value << "\nPress enter to continue\n";
             Terminal::setFgColor(Terminal::FG_DEFAULT);
-            if (ui->termRun)
-            {
-                flushSTDIN();
-            }
+
+            flushSTDIN();
             getchar();
             break;
         }
@@ -87,10 +84,10 @@ int CU::execute()
             if (ui->termRun)
                 ui->timerIncr();
             Terminal::setFgColor(Terminal::FG_BLUE);
-            std::cout << "Programm id finished\nPress enter to continue\n";
+            std::cout << "Programm is finished\nPress enter to continue\n";
             Terminal::setFgColor(Terminal::FG_DEFAULT);
             getchar();
-            return;
+            return 0;
         }
         }
     }
