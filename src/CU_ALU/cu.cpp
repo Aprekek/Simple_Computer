@@ -42,8 +42,15 @@ int CU::execute()
         }
         case WRITE:
         {
+
             ui->computer->memoryGet(operand, value);
-            std::cout << "Value: " << std::hex << value;
+            Terminal::setFgColor(Terminal::FG_BLUE);
+            std::cout << "Value: " << std::hex << value << "\nPress enter to continue\n";
+            Terminal::setFgColor(Terminal::FG_DEFAULT);
+            if (ui->termRun)
+            {
+                flushSTDIN();
+            }
             getchar();
             break;
         }
@@ -56,6 +63,30 @@ int CU::execute()
         {
             ui->computer->memorySet(operand, ui->accumulator);
             break;
+        }
+        case JUMP:
+        {
+            ui->instrCounter = operand - 1;
+            break;
+        }
+        case JNEG:
+        {
+            if (ui->accumulator < 0)
+                ui->instrCounter = operand - 1;
+            break;
+        }
+        case JZ:
+        {
+            if (ui->accumulator == 0)
+                ui->instrCounter = operand - 1;
+            break;
+        }
+        case HALT:
+        {
+            ui->instrCounter = operand;
+            if (ui->termRun)
+                ui->timerIncr();
+            return 1;
         }
         }
     }

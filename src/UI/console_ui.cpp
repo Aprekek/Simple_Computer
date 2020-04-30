@@ -173,7 +173,10 @@ void s_computerUI::highlightCell(size_t position)
     }
     else
     {
-        sprintf(operation, "  %04x", value);
+        if (value < 0)
+            sprintf(operation, " -%04x", abs(value));
+        else
+            sprintf(operation, "  %04x", value);
         computer->regSet(WRONG_COMAND, 1);
     }
     write(1, operation, strlen(operation));
@@ -289,7 +292,10 @@ void s_computerUI::printConditions()
     Terminal::gotoXY(5, 87 - len);
     write(1, buf, len);
 
-    sprintf(buf, "+%04x", accumulator); //print accumulator
+    if (accumulator < 0)
+        sprintf(buf, "-%04x", abs(accumulator)); //print accumulator
+    else
+        sprintf(buf, "%04x", accumulator);
     len = strlen(buf);
     Terminal::gotoXY(2, 89 - len);
     write(1, buf, len);
@@ -344,6 +350,7 @@ void s_computerUI::changeCell()
                     computer->regSet(WRONG_COMAND, 0);
                     computer->memorySet(instrCounter, value);
                     MyKeyBoard::switchToRaw();
+                    flushSTDIN();
                     return;
                 }
             }
@@ -354,6 +361,7 @@ void s_computerUI::changeCell()
             std::cin >> std::hex >> value;
             computer->memorySet(instrCounter, value);
             MyKeyBoard::switchToRaw();
+            flushSTDIN();
             return;
         }
         else
