@@ -6,7 +6,6 @@
 launcher
 config/*
 !config/syst
-1
 */f_d
 */f_obj
 src/a_libr

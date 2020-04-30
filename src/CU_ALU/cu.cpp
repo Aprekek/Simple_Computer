@@ -86,7 +86,11 @@ int CU::execute()
             ui->instrCounter = operand;
             if (ui->termRun)
                 ui->timerIncr();
-            return 1;
+            Terminal::setFgColor(Terminal::FG_BLUE);
+            std::cout << "Programm id finished\nPress enter to continue\n";
+            Terminal::setFgColor(Terminal::FG_DEFAULT);
+            getchar();
+            return;
         }
         }
     }
