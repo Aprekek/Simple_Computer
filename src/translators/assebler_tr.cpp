@@ -74,7 +74,6 @@ int AssemblerTR::cellValidCheck()
     offset += 2;
     arrList[cell] = new Node;
     arrList[cell]->cellKey = cell;
-    //std::cout << arrList[cell]->cellKey << " ";
 
     return 0;
 }
@@ -110,7 +109,6 @@ int AssemblerTR::comandValidCheck()
     }
     arrList[lineNumber]->comand = hash;
     offset = position2;
-    //std::cout << comand << " ";
 
     return 0;
 };
@@ -145,7 +143,6 @@ int AssemblerTR::operandValidCheck()
         }
     }
     arrList[lineNumber]->operand = operand;
-    //std::cout << operand << std::endl;
     return 0;
 };
 
@@ -219,9 +216,3 @@ int AssemblerTR::translate(std::string fileName)
     file.close();
     return 0;
 }
-
-/*int main()
-{
-    AssemblerTR::translate("assembler.sa");
-    return 0;
-}*/
