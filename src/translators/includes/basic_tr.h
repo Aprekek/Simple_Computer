@@ -18,8 +18,31 @@
 
 struct GoToMap
 {
-    int goToTarget;
-    int assStringNum;
+    bool isForward; // ex.: 20 goto 50 - true; 20 goto 15 - false
+    int basicGoToNum;
+    int basicTargNum;
+    int assTagrNum;
+    GoToMap *left;
+    GoToMap *right;
+};
+
+class GTLinkedList
+{
+private:
+    GoToMap *head;
+    GoToMap *tail;
+    size_t size;
+
+public:
+    GTLinkedList();
+    ~GTLinkedList();
+
+    size_t getSize();
+    void offsetHead();
+    void addNode(const GoToMap &n);
+    void deleteCurNode();
+    GoToMap *getHeadNode();
+    void assignAssStrNum(const int &assStrNum, const int &basicStrNum);
 };
 
 class BasicTr
@@ -27,8 +50,8 @@ class BasicTr
 private:
     static std::vector<std::string> assStrings;
     static std::vector<std::string> basicStrings;
-    static std::vector<GoToMap> goToTargets;
-    static std::array<int, 25> variableCell;
+    static GTLinkedList goToTargets;
+    static std::array<int, 26> variableCell;
     static int totalVariables;
     static int targetsFreed;
     static int offset;
@@ -37,14 +60,13 @@ private:
 
     static int simpleOperParams();
     static int complexOperParams();
-    static int assComandToBasic(const std::string &strComand);
+    static int basicComandToAss(const std::string &strComand);
 
     static void readFile(std::fstream &file);
     static int checkLineNum();
     static int checkComand();
-    static int checkParametrs();
 
-    static void findGOTO();
+    static void findGOTO(const int &i);
     static int parsing();
 
 public:

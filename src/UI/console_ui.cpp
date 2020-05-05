@@ -493,7 +493,6 @@ void s_computerUI::checkDelayPassed()
             timerIncr();
             computer->regSet(WRONG_COMAND, 1);
             computer->regSet(IGNR_CLOCK_PULSES, 1);
-            //printFlagReg();
             Terminal::gotoXY(23, 0);
             Terminal::setFgColor(Terminal::FG_RED);
             std::cout << "Wrong command or operand\nPress ENTER to continue" << std::endl;
