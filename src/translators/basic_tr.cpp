@@ -33,7 +33,7 @@ void GTLinkedList::addNode(const GoToMap &n)
 
     node->basicTargNum = n.basicTargNum;
     node->isForward = n.isForward;
-    node->assTagrNum = node->basicGoToNum = 0;
+    node->assTagrNum = node->assGoToNum = 0;
 
     if (size == 0)
     {
@@ -77,16 +77,20 @@ GoToMap *GTLinkedList::getHeadNode()
     return head;
 }
 
-void GTLinkedList::assignAssStrNum(const int &assStrNum, const int &basicStrNum)
+bool GTLinkedList::assignAssStrNum(const int &assStrNum, const int &basicStrNum)
 {
+    bool assign = false;
     GoToMap *temp = head;
     for (size_t i = 0; i < size; ++i)
     {
         if (basicStrNum == temp->basicTargNum)
+        {
             temp->assTagrNum = assStrNum;
-
+            assign = true;
+        }
         temp = temp->right;
     }
+    return assign;
 }
 
 //_____________Basic_____________
@@ -123,17 +127,25 @@ void BasicTr::findGOTO(const int &i)
 
 int BasicTr::checkLineNum()
 {
+    static int prevLineNumb = -1;
+    std::string buf;
     std::size_t position = basicStrings[basicStrNum].find_first_of(" ");
 
-    assStrings.push_back(basicStrings[basicStrNum].substr(0, position));
+    buf = basicStrings[basicStrNum].substr(0, position);
 
-    if (basicStrNum != std::stoi(assStrings[assStrNum]))
+    if (basicStrNum != std::stoi(buf))
     {
         std::cout << "Wrong order line number : " << basicStrings[basicStrNum]
                   << "; expected " << basicStrNum << std::endl;
         return -1;
     }
 
+    if (prevLineNumb != assStrNum)
+        assStrings.push_back(std::to_string(assStrNum));
+    else
+        assStrings[assStrNum] = std::to_string(assStrNum);
+
+    prevLineNumb = assStrNum;
     offset = position;
 
     return 0;
@@ -145,8 +157,11 @@ int BasicTr::checkComand()
     std::size_t position2 = basicStrings[basicStrNum].find_first_of(" \n\0", position1);
     if (position1 == std::string::npos || position2 == std::string::npos)
     {
-        std::cout << "Cannot find comand : " << basicStrings[basicStrNum] << std::endl;
-        return -1;
+        if (basicStrings[basicStrNum][position2] != '\0')
+        {
+            std::cout << "Cannot find comand : " << basicStrings[basicStrNum] << std::endl;
+            return -1;
+        }
     }
 
     std::string strComand = basicStrings[basicStrNum].substr(position1, position2 - position1);
@@ -157,27 +172,57 @@ int BasicTr::checkComand()
 
 int BasicTr::basicComandToAss(const std::string &strComand)
 {
-    //checking if current line is target to goto
-    goToTargets.assignAssStrNum(assStrNum, basicStrNum);
+    //checking if current line is target to goto and if it is REM - error
+    bool isRem = goToTargets.assignAssStrNum(assStrNum, basicStrNum);
 
     if (strComand.compare("INPUT") == 0)
     {
         assStrings[assStrNum] += " READ ";
         return simpleOperParams();
     }
-    if (strComand.compare("OUTPUT") == 0)
+    if (strComand.compare("PRINT") == 0)
     {
         assStrings[assStrNum] += " WRITE ";
         return simpleOperParams();
     }
-    if (strComand.compare("GOTO") == 0)
-        return _JUMP;
     if (strComand.compare("END") == 0)
-        return _END;
+    {
+        assStrings[assStrNum] += " HALT 0";
+        ++assStrNum;
+        return 0;
+    }
     if (strComand.compare("REM") == 0)
-        return _REM;
+    {
+        if (isRem)
+        {
+            std::cout << "at line " << basicStrNum << " REM can't be the goal of goto\n"
+                      << basicStrings[basicStrNum] << std::endl;
+            return -1;
+        }
+        return 0;
+    }
     if (strComand.compare("SHR") == 0)
-        return _SHR;
+    {
+        assStrings[assStrNum] += " SHR ";
+        return simpleOperParams();
+    }
+    if (strComand.compare("GOTO") == 0)
+    {
+        GoToMap *node = goToTargets.getHeadNode();
+        assStrings[assStrNum] += " GOTO ";
+        if (!node->isForward)
+        {
+            assStrings[assStrNum] += std::to_string(node->assTagrNum);
+            goToTargets.deleteCurNode();
+        }
+        else
+        {
+            node->assGoToNum = assStrNum;
+            goToTargets.offsetHead();
+        }
+        ++assStrNum;
+        return 0;
+    }
     if (strComand.compare("IF") == 0)
         return _IF;
     if (strComand.compare("LET") == 0)
@@ -223,8 +268,6 @@ int BasicTr::parsing()
     for (int i = 0; i < 25; ++i)
         variableCell[i] = -1;
 
-    std::string buf;
-
     int end = basicStrings.size();
     for (int i = 0; i < end; ++i) //check assembler lines count bounding
     {
@@ -238,6 +281,15 @@ int BasicTr::parsing()
         ++basicStrNum;
     }
 
+    end = goToTargets.getSize();
+    GoToMap *node = nullptr;
+    for (int i = 0; i < end; ++i)
+    {
+        node = goToTargets.getHeadNode();
+        assStrings[node->assGoToNum] += std::to_string(node->assTagrNum);
+        goToTargets.deleteCurNode();
+    }
+    
     return 0;
 }
 

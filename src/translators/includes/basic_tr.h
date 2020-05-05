@@ -19,9 +19,9 @@
 struct GoToMap
 {
     bool isForward; // ex.: 20 goto 50 - true; 20 goto 15 - false
-    int basicGoToNum;
     int basicTargNum;
-    int assTagrNum;
+    int assGoToNum;
+    int assTagrNum; 
     GoToMap *left;
     GoToMap *right;
 };
@@ -42,7 +42,7 @@ public:
     void addNode(const GoToMap &n);
     void deleteCurNode();
     GoToMap *getHeadNode();
-    void assignAssStrNum(const int &assStrNum, const int &basicStrNum);
+    bool assignAssStrNum(const int &assStrNum, const int &basicStrNum);
 };
 
 class BasicTr
