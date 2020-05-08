@@ -364,7 +364,7 @@ int BasicTr::BasicExprToPolishStrParser()
             polishExpr += " ";
             isVariablePassed = true;
         }
-        else if ((symbol - '0' > -1) && (symbol - '0') < 10) //if digit variable
+        else if (isDigit(symbol)) //if digit variable
         {
             if (isVariablePassed)
             {
@@ -379,7 +379,7 @@ int BasicTr::BasicExprToPolishStrParser()
                 polishExpr.push_back(symbol);
                 ++i;
                 symbol = expression[i];
-            } while ((symbol - '0' > -1) && (symbol - '0') < 10);
+            } while (isDigit(symbol));
             polishExpr += " ";
             isVariablePassed = true;
             --i; //reason is ++i in while at 378
@@ -426,6 +426,8 @@ int BasicTr::BasicExprToPolishStrParser()
 
     pushPopStack(' ', stack, polishExpr, P_ALL); //pop all symbols to polishExpr
     std::cout << polishExpr << std::endl;
+
+    polishNotationToAssemler(polishExpr, storingVar);
 
     return 0;
 }
@@ -516,6 +518,35 @@ int BasicTr::pushPopStack(const char &symbol, std::vector<char> &stack,
 
     stack.push_back(symbol);
 
+    return 0;
+}
+
+//dont work
+int BasicTr::polishNotationToAssemler(std::string expresision, int storingVar)
+{
+    std::string assebmlerLine;
+    int end = expresision.size();
+    char symbol = expresision[0];
+    int i = 1;
+
+    /*if (isDigit(symbol))
+    {
+        assebmlerLine = "  ";
+    }
+
+    for (; i < end; ++i)
+    {
+    }*/
+
+    // fromm accumulator to cell
+    assebmlerLine = std::to_string(i) + " STORE " + std::to_string(variableCell[storingVar]);
+    assStrings.push_back(assebmlerLine);
+}
+
+bool BasicTr::isDigit(const char &c)
+{
+    if ((c - '0' > -1) && (c - '0') < 10)
+        return 1;
     return 0;
 }
 

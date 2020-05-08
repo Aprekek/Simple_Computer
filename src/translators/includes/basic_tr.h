@@ -75,6 +75,8 @@ private:
     static void findGOTO(const int &i);
     static int BasicExprToPolishStrParser();
     static int pushPopStack(const char &symbol, std::vector<char> &stack, std::string &polishExpr, int priority);
+    static int polishNotationToAssemler(std::string expresision, int storingVar);
+    static bool isDigit(const char &c);
     static int parsing();
 
 public:
