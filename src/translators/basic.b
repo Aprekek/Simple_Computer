@@ -3,5 +3,7 @@
 2 INPUT B
 3 GOTO 5
 4 END
-5 PRINT B
-6 END
+5 LET C = 55
+6 LET C = A*(B-B*(C+22))+3/2*(-B)
+7 PRINT C
+8 END

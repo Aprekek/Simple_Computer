@@ -16,12 +16,19 @@
 #define _JUMP 0x40
 #define _SHR 0x61
 
+#define P_MUL_DIV 1
+#define P_ADD 2
+#define P_SUB 3
+#define P_OPEN_BR 4
+#define P_CLOSE_BR 5
+#define P_ALL 6
+
 struct GoToMap
 {
     bool isForward; // ex.: 20 goto 50 - true; 20 goto 15 - false
     int basicTargNum;
     int assGoToNum;
-    int assTagrNum; 
+    int assTagrNum;
     GoToMap *left;
     GoToMap *right;
 };
@@ -59,7 +66,6 @@ private:
     static int assStrNum;
 
     static int simpleOperParams();
-    static int complexOperParams();
     static int basicComandToAss(const std::string &strComand);
 
     static void readFile(std::fstream &file);
@@ -67,6 +73,8 @@ private:
     static int checkComand();
 
     static void findGOTO(const int &i);
+    static int BasicExprToPolishStrParser();
+    static int pushPopStack(const char &symbol, std::vector<char> &stack, std::string &polishExpr, int priority);
     static int parsing();
 
 public:

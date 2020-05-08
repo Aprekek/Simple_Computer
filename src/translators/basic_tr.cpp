@@ -223,10 +223,12 @@ int BasicTr::basicComandToAss(const std::string &strComand)
         ++assStrNum;
         return 0;
     }
+    if (strComand.compare("LET") == 0)
+    {
+        return BasicExprToPolishStrParser();
+    }
     if (strComand.compare("IF") == 0)
         return _IF;
-    if (strComand.compare("LET") == 0)
-        return _LET;
 
     std::cout << "Underfined command \"" << strComand << "\" at line " << basicStrNum << std::endl;
     return -1;
@@ -252,7 +254,7 @@ int BasicTr::simpleOperParams()
 
     if (variableCell[index] == -1)
     {
-        variableCell[index] = 99 - totalVariables;
+        variableCell[index] = 98 - totalVariables;
         ++totalVariables;
     }
     assStrings[assStrNum] += std::to_string(variableCell[index]);
@@ -261,7 +263,261 @@ int BasicTr::simpleOperParams()
     return 0;
 };
 
-int BasicTr::complexOperParams() { return 0; }
+int BasicTr::BasicExprToPolishStrParser()
+{
+    std::string polishExpr;
+    std::vector<char> stack;
+    std::string expression = basicStrings[basicStrNum].substr(offset + 1);
+
+    int i = 0;
+    int storingVar = 0;
+    short openBracket = 0, closeBracket = 0;
+    char symbol = ' ';
+    bool incorrectExpr = false;
+
+    //looks for a variable storing the result of an expression
+    do
+    {
+        symbol = expression[i];
+        ++i;
+    } while (symbol == ' ');
+
+    storingVar = symbol - 'A';
+
+    do
+    {
+        symbol = expression[i];
+        ++i;
+    } while (symbol != '=' && symbol != '\0');
+
+    if (symbol != '=')
+    {
+        std::cout << "At line " << basicStrNum << ":\n\tCannot find storing variable (\'=\'?): "
+                  << expression << std::endl;
+        return -1;
+    }
+
+    if (variableCell[storingVar] == -1)
+    {
+        variableCell[storingVar] = 98 - totalVariables;
+        ++totalVariables;
+    }
+
+    //checking brackets and floating numbers
+    while (symbol != '\0')
+    {
+        symbol = expression[i];
+
+        if (symbol == '(')
+            ++openBracket;
+        else if (symbol == ')')
+        {
+            ++closeBracket;
+            if (closeBracket > openBracket)
+            {
+                std::cout << "At line " << basicStrNum << ":\n\tCheck the order of the brackets: "
+                          << expression << std::endl;
+                incorrectExpr = true;
+            }
+        }
+        else if (symbol == '.' || symbol == ',')
+        {
+            std::cout << "At line " << basicStrNum << ":\n\tNumbers must be integers: "
+                      << expression << std::endl;
+            incorrectExpr = true;
+        }
+        ++i;
+    }
+    if (openBracket != closeBracket)
+    {
+        std::cout << "At line " << basicStrNum << ":\n\tThe number of open and closed brackets is not equal: "
+                  << expression << std::endl;
+        incorrectExpr = true;
+    }
+    if (incorrectExpr)
+        return -1;
+
+    //Parsing expression to polish
+    int prevOperation = 0;         //needed when parsing a single minus ex: 5 * -3
+    bool isVariablePassed = false; //excludes ex: AA + B
+    i = 3;                         //excludes ex: "C ="
+    symbol = expression[i];
+
+    while (symbol != '\0')
+    {
+        while (symbol == ' ') //exclude spaces
+        {
+            symbol = expression[i];
+            ++i;
+        }
+
+        if (((symbol - 'A') > -1) && ((symbol - 'A') < 26)) //if symbolic variable
+        {
+            if (isVariablePassed)
+            {
+                std::cout << "At line " << basicStrNum
+                          << ":\n\tMake shure that your variable in range of A-Z in uppercase or its integer: "
+                          << expression << std::endl;
+                return -1;
+            }
+            polishExpr.push_back(symbol);
+            polishExpr += " ";
+            isVariablePassed = true;
+        }
+        else if ((symbol - '0' > -1) && (symbol - '0') < 10) //if digit variable
+        {
+            if (isVariablePassed)
+            {
+                std::cout << "At line " << basicStrNum
+                          << ":\n\tMake shure that your variable in range of A-Z in uppercase or its integer: "
+                          << expression << std::endl;
+                return -1;
+            }
+
+            do
+            {
+                polishExpr.push_back(symbol);
+                ++i;
+                symbol = expression[i];
+            } while ((symbol - '0' > -1) && (symbol - '0') < 10);
+            polishExpr += " ";
+            isVariablePassed = true;
+            --i; //reason is ++i in while at 378
+        }
+        else //if operation
+        {
+            switch (symbol)
+            {
+            case '+':
+                prevOperation = P_ADD;
+                break;
+            case '-':
+                if (isVariablePassed == false) // ex: 5 * -3
+                    polishExpr += "0 ";
+
+                prevOperation = P_SUB;
+                break;
+            case '*':
+                prevOperation = P_MUL_DIV;
+                break;
+            case '/':
+                prevOperation = P_MUL_DIV;
+                break;
+            case '(':
+                prevOperation = P_OPEN_BR;
+                break;
+            case ')':
+                prevOperation = P_CLOSE_BR;
+                break;
+            default:
+            {
+                std::cout << "At line " << basicStrNum
+                          << ":\n\tUnknown symbol \'" << symbol << "\' : "
+                          << expression << std::endl;
+                return -1;
+            }
+            }
+            pushPopStack(symbol, stack, polishExpr, prevOperation);
+            isVariablePassed = false;
+        }
+        ++i;
+        symbol = expression[i];
+    }
+
+    pushPopStack(' ', stack, polishExpr, P_ALL); //pop all symbols to polishExpr
+    std::cout << polishExpr << std::endl;
+
+    return 0;
+}
+
+int BasicTr::pushPopStack(const char &symbol, std::vector<char> &stack,
+                          std::string &polishExpr, int priority)
+{
+    int i = stack.size() - 1;
+    if (priority == P_ALL)
+    {
+        while (i > -1)
+        {
+            polishExpr.push_back(stack[i]);
+            polishExpr += " ";
+            --i;
+        }
+        return 0;
+    }
+
+    if (stack.size() == 0)
+    {
+        stack.push_back(symbol);
+        return 0;
+    }
+
+    char popedSymbol = ' ';
+
+    if (priority == P_MUL_DIV)
+    {
+        while (i > -1)
+        {
+            popedSymbol = stack[i];
+            if ((popedSymbol == '*') || (popedSymbol == '/'))
+            {
+                polishExpr.push_back(popedSymbol);
+                polishExpr += " ";
+                stack.pop_back();
+                --i;
+            }
+            else
+                break;
+        }
+    }
+    else if ((priority == P_ADD) || (priority == P_SUB))
+    {
+        while (i > -1)
+        {
+            popedSymbol = stack[i];
+            if (popedSymbol == '(')
+                break;
+
+            polishExpr.push_back(popedSymbol);
+            polishExpr += " ";
+            stack.pop_back();
+            --i;
+        }
+    }
+    else if (priority == P_CLOSE_BR)
+    {
+        while (i > -1)
+        {
+            popedSymbol = stack[i];
+            stack.pop_back();
+            --i;
+            if (popedSymbol == '(') //
+            {
+                while (i > -1)
+                {
+                    popedSymbol = stack[i];
+                    if ((popedSymbol == '*') || (popedSymbol == '/'))
+                    {
+                        polishExpr.push_back(popedSymbol);
+                        polishExpr += " ";
+                        stack.pop_back();
+                        --i;
+                    }
+                    else
+                        break;
+                }
+                break;
+            }
+
+            polishExpr.push_back(popedSymbol);
+            polishExpr += " ";
+        }
+        return 0;
+    }
+
+    stack.push_back(symbol);
+
+    return 0;
+}
 
 int BasicTr::parsing()
 {
@@ -289,7 +545,7 @@ int BasicTr::parsing()
         assStrings[node->assGoToNum] += std::to_string(node->assTagrNum);
         goToTargets.deleteCurNode();
     }
-    
+
     return 0;
 }
 
