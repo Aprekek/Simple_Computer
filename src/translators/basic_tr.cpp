@@ -225,10 +225,12 @@ int BasicTr::basicComandToAss(const std::string &strComand)
     }
     if (strComand.compare("LET") == 0)
     {
-        return BasicExprToPolishStrParser();
+        return BasicExprToPolishStrParser(basicStrings[basicStrNum].substr(offset + 1), 0);
     }
     if (strComand.compare("IF") == 0)
-        return _IF;
+    {
+        return ifParser();
+    }
 
     std::cout << "Underfined command \"" << strComand << "\" at line " << basicStrNum << std::endl;
     return -1;
@@ -254,7 +256,7 @@ int BasicTr::simpleOperParams()
 
     if (variableCell[index] == -1)
     {
-        variableCell[index] = 96 - totalVariables;
+        variableCell[index] = 94 - totalVariables;
         ++totalVariables;
     }
     assStrings[assStrNum] += std::to_string(variableCell[index]);
@@ -263,11 +265,11 @@ int BasicTr::simpleOperParams()
     return 0;
 };
 
-int BasicTr::BasicExprToPolishStrParser()
+int BasicTr::BasicExprToPolishStrParser(const std::string &expr, int flag) //if LET => flag = 0; if left expretion in IF flag = 1; if right = 2
 {
     std::string polishExpr;
     std::vector<char> stack;
-    std::string expression = basicStrings[basicStrNum].substr(offset + 1);
+    std::string expression = expr;
 
     int i = 0;
     int storingVar = 0;
@@ -275,33 +277,42 @@ int BasicTr::BasicExprToPolishStrParser()
     char symbol = ' ';
     bool incorrectExpr = false;
 
-    //looks for a variable storing the result of an expression
-    do
+    if (flag == 0)
     {
-        symbol = expression[i];
-        ++i;
-    } while (symbol == ' ');
+        //looks for a variable storing the result of an expression
+        do
+        {
+            symbol = expression[i];
+            ++i;
+        } while (symbol == ' ');
 
-    storingVar = symbol - 'A';
+        storingVar = symbol - 'A';
 
-    do
-    {
-        symbol = expression[i];
-        ++i;
-    } while (symbol != '=' && symbol != '\0');
+        do
+        {
+            symbol = expression[i];
+            ++i;
+        } while (symbol != '=' && symbol != '\0');
 
-    if (symbol != '=')
-    {
-        std::cout << "At line " << basicStrNum << ":\n\tCannot find storing variable (\'=\'?): "
-                  << expression << std::endl;
+        if (symbol != '=')
+        {
+            std::cout << "At line " << basicStrNum << ":\n\tCannot find storing variable (\'=\'?): "
+                      << expression << std::endl;
+            return -1;
+        }
+
+        if (variableCell[storingVar] == -1)
+        {
+            variableCell[storingVar] = 94 - totalVariables;
+            ++totalVariables;
+        }
+    }
+    else if (flag == 1)
+        storingVar = 95;
+    else if (flag == 2)
+        storingVar = 96;
+    else
         return -1;
-    }
-
-    if (variableCell[storingVar] == -1)
-    {
-        variableCell[storingVar] = 96 - totalVariables;
-        ++totalVariables;
-    }
 
     //checking brackets and floating numbers
     while (symbol != '\0')
@@ -320,7 +331,7 @@ int BasicTr::BasicExprToPolishStrParser()
                 incorrectExpr = true;
             }
         }
-        else if (symbol >= '0' && symbol <= '9')
+        else if (symbol >= '1' && symbol <= '9')
         {
             std::cout << "At line " << basicStrNum << ":\n\tExpressions must be only with variables: "
                       << expression << std::endl;
@@ -340,7 +351,11 @@ int BasicTr::BasicExprToPolishStrParser()
     //Parsing expression to polish
     int prevOperation = 0;         //needed when parsing a single minus ex: A * -B
     bool isVariablePassed = false; //excludes ex: AA + B
-    i = 4;                         //excludes ex: "C ="
+    if (flag == 0)
+        i = 4; //excludes ex: "C ="
+    else
+        i = 0;
+
     symbol = expression[i];
 
     while (symbol != '\0')
@@ -362,7 +377,7 @@ int BasicTr::BasicExprToPolishStrParser()
             }
             if (variableCell[symbol - 'A'] == -1)
             {
-                variableCell[symbol - 'A'] = 96 - totalVariables;
+                variableCell[symbol - 'A'] = 94 - totalVariables;
                 ++totalVariables;
             }
             polishExpr.push_back(symbol);
@@ -507,11 +522,8 @@ int BasicTr::polishNotationToAssemler(std::string expresision, int storingVar)
     std::string assebmlerLine;
     std::size_t positionOper;
     std::size_t positionAccum;
-    //   std::size_t positionTempCell;
     char symbol;
     int tempCell = 1; // if 1 cell = 98 if 0 cell = 99
-    //int end = expresision.size();
-    // int i = 0;
 
     if (expresision.size() != 1)
     {
@@ -524,7 +536,10 @@ int BasicTr::polishNotationToAssemler(std::string expresision, int storingVar)
         positionOper = 0;
         symbol = expresision[positionOper];
     }
-    assStrings[assStrNum] = (std::to_string(assStrNum) + " LOAD " + std::to_string(variableCell[symbol - 'A']));
+    if (assStrings.size() == assStrNum)
+        assStrings.push_back(std::to_string(assStrNum) + " LOAD " + std::to_string(variableCell[symbol - 'A']));
+    else
+        assStrings[assStrNum] = (std::to_string(assStrNum) + " LOAD " + std::to_string(variableCell[symbol - 'A']));
     ++assStrNum;
 
     while (expresision.size() - 1 > 0)
@@ -588,7 +603,11 @@ int BasicTr::polishNotationToAssemler(std::string expresision, int storingVar)
         positionOper = expresision.find_first_of("+-/*");
     }
 
-    assStrings.push_back(std::to_string(assStrNum) + " STORE " + std::to_string(variableCell[storingVar]));
+    int order = storingVar;
+    if ((order > -1) && (order < 26))
+        order = variableCell[storingVar];
+
+    assStrings.push_back(std::to_string(assStrNum) + " STORE " + std::to_string(order));
     ++assStrNum;
 }
 
@@ -645,11 +664,168 @@ void BasicTr::targetAdress2(const std::string &assebmlerLine, std::string assemb
     ++assStrNum;
 }
 
+int BasicTr::ifParser()
+{
+    std::size_t position = basicStrings[basicStrNum].find_first_not_of(" ", offset);
+    if (position == std::string::npos)
+    {
+        std::cout << "at line " << basicStrNum << "\n\tСheck your \"IF\" condition for correctness:"
+                  << basicStrings[basicStrNum];
+        return -1;
+    }
+    std::size_t position2 = basicStrings[basicStrNum].find_first_of("><=", position);
+    if (position == std::string::npos)
+    {
+        std::cout << "at line " << basicStrNum << "\n\tСheck your \"IF\" condition for correctness:"
+                  << basicStrings[basicStrNum];
+        return -1;
+    }
+
+    std::string leftIfExr, rightIfExpr;
+    leftIfExr = basicStrings[basicStrNum].substr(position, position2 - position);
+    if (leftIfExr[0] != '(')
+    {
+        std::cout << "at line " << basicStrNum << "\n\tExpresions if \"IF\" must be in brackets:"
+                  << basicStrings[basicStrNum] << std::endl;
+        return -1;
+    }
+
+    if (leftIfExr[leftIfExr.size() - 1] != ' ')
+    {
+        std::cout << "at line " << basicStrNum << "\n\tExpresions if \"IF\" must be in brackets or "
+                  << "check you spases: " << basicStrings[basicStrNum] << std::endl;
+        return -1;
+    }
+    if (leftIfExr[leftIfExr.size() - 2] != ')')
+    {
+        std::cout << "at line " << basicStrNum << "\n\tExpresions if \"IF\" must be in brackets or "
+                  << "check you spases: " << basicStrings[basicStrNum] << std::endl;
+        return -1;
+    }
+
+    leftIfExr = leftIfExr.substr(1, leftIfExr.size() - 3); //remove brackets
+    char symbol = basicStrings[basicStrNum][position2];    //> < =
+
+    if (basicStrings[basicStrNum][position2 + 1] != ' ')
+    {
+        std::cout << "at line " << basicStrNum << "\n\tThere must be a space after the condition sign"
+                  << basicStrings[basicStrNum] << std::endl;
+        return -1;
+    }
+
+    position = basicStrings[basicStrNum].find_first_not_of(" ", position2 + 1);
+    if (position == std::string::npos)
+    {
+        std::cout << "at line " << basicStrNum << "\n\tСheck your \"IF\" condition for correctness:"
+                  << basicStrings[basicStrNum];
+        return -1;
+    }
+
+    if (basicStrings[basicStrNum][position] != '(')
+    {
+        std::cout << "at line " << basicStrNum << "\n\tExpresions if \"IF\" must be in brackets:"
+                  << basicStrings[basicStrNum] << std::endl;
+        return -1;
+    }
+
+    position2 = basicStrings[basicStrNum].find_first_of(" ", position);
+    std::cout << basicStrings[basicStrNum][position2] << std::endl;
+
+    if (basicStrings[basicStrNum][position2 - 1] != ')')
+    {
+        std::cout << "at line " << basicStrNum << "\n\tExpresions if \"IF\" must be in brackets:"
+                  << basicStrings[basicStrNum] << std::endl;
+        return -1;
+    }
+    rightIfExpr = basicStrings[basicStrNum].substr(position + 1, position2 - position - 2);
+
+    BasicExprToPolishStrParser(leftIfExr, 1);
+    if (rightIfExpr != "0")
+        BasicExprToPolishStrParser(rightIfExpr, 2);
+
+    switch (symbol)
+    {
+    case '>':
+    {
+        int jnegStr, jzStr;
+        assStrings.push_back(std::to_string(assStrNum) + " LOAD " + "95");
+        assStrings.push_back(std::to_string(assStrNum + 1) + " SUB " + "96");
+        assStrings.push_back(std::to_string(assStrNum + 2) + " JNEG "); //+ std::to_string(assStrNum + 5));
+        jnegStr = assStrings.size() - 1;
+        assStrings.push_back(std::to_string(assStrNum + 3) + " JZ "); //+ std::to_string(assStrNum + 5));
+        jzStr = jnegStr + 1;
+        assStrNum += 4;
+
+        offset = position2;
+        assStrings.push_back(std::to_string(assStrNum));
+        checkComand();
+
+        assStrings[jnegStr] += std::to_string(assStrNum);
+        assStrings[jzStr] += std::to_string(assStrNum);
+        break;
+    }
+    case '<':
+    {
+        int jnegStr, jzStr;
+        assStrings.push_back(std::to_string(assStrNum) + " LOAD " + "96");
+        assStrings.push_back(std::to_string(assStrNum + 1) + " SUB " + "95");
+        assStrings.push_back(std::to_string(assStrNum + 2) + " JNEG "); //+ std::to_string(assStrNum + 5));
+        jnegStr = assStrings.size() - 1;
+        assStrings.push_back(std::to_string(assStrNum + 3) + " JZ "); //+ std::to_string(assStrNum + 5));
+        jzStr = jnegStr + 1;
+        assStrNum += 4;
+
+        offset = position2;
+        assStrings.push_back(std::to_string(assStrNum));
+        checkComand();
+
+        assStrings[jnegStr] += std::to_string(assStrNum);
+        assStrings[jzStr] += std::to_string(assStrNum);
+        break;
+    }
+    case '=':
+    {
+        int jumpStr;
+        if (rightIfExpr == "0")
+        {
+            assStrings.push_back(std::to_string(assStrNum) + " LOAD " + "95");
+            ++assStrNum;
+        }
+        else
+        {
+            assStrings.push_back(std::to_string(assStrNum) + " LOAD " + "96");
+            assStrings.push_back(std::to_string(assStrNum + 2) + " SUB " + "95");
+            assStrNum += 2;
+        }
+        assStrings.push_back(std::to_string(assStrNum) + " JZ " + std::to_string(assStrNum + 2));
+        assStrings.push_back(std::to_string(assStrNum + 1) + " JUMP "); //+ std::to_string(assStrNum + 3));
+        jumpStr = assStrings.size() - 1;
+        assStrNum += 2;
+
+        offset = position2;
+        assStrings.push_back(std::to_string(assStrNum));
+        checkComand();
+
+        assStrings[jumpStr] += std::to_string(assStrNum);
+        break;
+    }
+    default:
+        std::cout << "at line " << basicStrNum << "\n\tUncknown symbol \"" << symbol
+                  << "\":" << basicStrings[basicStrNum] << std::endl;
+        return -1;
+    }
+
+    // std::cout << basicStrings[basicStrNum][position2 + 1] << std::endl;
+
+    std::cout << leftIfExr << std::endl;
+    std::cout << symbol << std::endl;
+    std::cout << rightIfExpr << std::endl;
+
+    return 0;
+}
+
 int BasicTr::parsing()
 {
-    for (int i = 0; i < 25; ++i)
-        variableCell[i] = -1;
-
     int end = basicStrings.size();
     for (int i = 0; i < end; ++i) //check assembler lines count bounding
     {
@@ -713,6 +889,15 @@ int BasicTr::translate(std::string fileName)
     }
 
     readFile(file);
+
+    for (int i = 0; i < 25; ++i)
+        variableCell[i] = -1;
+
+    // std::cout << "1111\n";
+    // BasicExprToPolishStrParser("A+B", 1);
+    // std::cout << "2222\n";
+    // BasicExprToPolishStrParser("0", 2);
+    // std::cout << "3333\n";
 
     if (parsing() == -1)
     {

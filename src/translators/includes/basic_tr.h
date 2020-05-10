@@ -73,13 +73,14 @@ private:
     static int checkComand();
 
     static void findGOTO(const int &i);
-    static int BasicExprToPolishStrParser();
+    static int BasicExprToPolishStrParser(const std::string &expr, int flag);
     static int pushPopStack(const char &symbol, std::vector<char> &stack, std::string &polishExpr, int priority);
     static int polishNotationToAssemler(std::string expresision, int storingVar);
     static void targetAdress(const std::string &assebmlerLine,
                              std::string &expression, int offset);
     static void targetAdress2(const std::string &assebmlerLine, std::string assemblComand,
                               std::string &expression, int offset, int tempCell);
+    static int ifParser();
     static int parsing();
 
 public:

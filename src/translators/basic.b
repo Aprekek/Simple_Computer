@@ -1,9 +1,3 @@
-0 REM comment
-1 INPUT A
-2 INPUT B
-3 GOTO 7
-4 END
-5 LET A = (C-B)/(-B)
-6 REM LET C = A+B*((A-C)+B)-A/B
-7 PRINT C
-8 END
+0 INPUT A
+1 IF (A+B) = (A) LET A = A+C
+2 END
