@@ -1,3 +1,0 @@
-0 INPUT A
-1 IF (A+B) = (A) LET A = A+C
-2 END

@@ -18,6 +18,7 @@ class AssemblerTR
 private:
     static std::string textString;
     static std::array<Node *, 100> arrList;
+    static int assignmentCell;
     static char tempBufer[128];
     static std::fstream file;
     static int offset;

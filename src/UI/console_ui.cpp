@@ -58,27 +58,40 @@ void _UI_::free()
 
 const std::string s_computerUI::SYST_PATH = "config/syst";
 
-s_computerUI::s_computerUI() : _UI_::_UI_()
+s_computerUI::s_computerUI(std::string pathToFile) : _UI_::_UI_()
 {
     computer = SimpleComputer::getInstance();
     reset();
 
     MyKeyBoard::switchToRaw();
-    if (AssemblerTR::translate("config/assembler.sa") == -1)
+    if (BasicTr::translate(pathToFile) == -1)
     {
-        std::cout << "Press any key to continue\n";
+        std::cout << "\nPress any key to continue\n";
         getchar();
-
+        getchar();
         computer->memoryLoad(SYST_PATH);
     }
     else
     {
-        if (initRAMfromObjFile("config/assembler.sa") == -1)
+        pathToFile = pathToFile.substr(0, pathToFile.find_last_of(".")) + ".sa";
+        if (AssemblerTR::translate(pathToFile) == -1)
         {
-            std::cout << "Press any key to continue\n";
+            std::cout << "\nPress any key to continue\n";
             getchar();
-
+            getchar();
             computer->memoryLoad(SYST_PATH);
+        }
+        else
+        {
+            std::cout << "aa\n";
+            if (initRAMfromObjFile("config/assembler.sa") == -1)
+            {
+                std::cout << "Press any key to continue\n";
+                getchar();
+
+                computer->memoryLoad(SYST_PATH);
+            }
+            std::cout << "bb\n";
         }
     }
     sComputerCU = new CU();
@@ -92,12 +105,12 @@ void s_computerUI::reset()
     computer->init();
 }
 
-_UI_ *s_computerUI::getInstance()
+_UI_ *s_computerUI::getInstance(std::string pathToFile)
 {
     ++instValue;
     if (instance == nullptr)
     {
-        instance = new s_computerUI();
+        instance = new s_computerUI(pathToFile);
     }
 
     return instance;

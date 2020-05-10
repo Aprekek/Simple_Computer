@@ -209,7 +209,7 @@ int BasicTr::basicComandToAss(const std::string &strComand)
     if (strComand.compare("GOTO") == 0)
     {
         GoToMap *node = goToTargets.getHeadNode();
-        assStrings[assStrNum] += " GOTO ";
+        assStrings[assStrNum] += " JUMP ";
         if (!node->isForward)
         {
             assStrings[assStrNum] += std::to_string(node->assTagrNum);
@@ -424,7 +424,6 @@ int BasicTr::BasicExprToPolishStrParser(const std::string &expr, int flag) //if 
     }
 
     pushPopStack(' ', stack, polishExpr, P_ALL); //pop all symbols to polishExpr
-    std::cout << polishExpr << std::endl;
 
     polishNotationToAssemler(polishExpr, storingVar);
 
@@ -566,7 +565,7 @@ int BasicTr::polishNotationToAssemler(std::string expresision, int storingVar)
                 break;
             case '/':
                 assebmlerLine = std::to_string(assStrNum) + " STORE ";
-                targetAdress2(assebmlerLine, " DIV ", expresision, positionOper - 2, tempCell);
+                targetAdress2(assebmlerLine, " DIVIDE ", expresision, positionOper - 2, tempCell);
                 break;
             }
         }
@@ -593,7 +592,7 @@ int BasicTr::polishNotationToAssemler(std::string expresision, int storingVar)
                 assebmlerLine = std::to_string(assStrNum) + " MUL ";
                 break;
             case '/':
-                assebmlerLine = std::to_string(assStrNum) + " DIV ";
+                assebmlerLine = std::to_string(assStrNum) + " DIVIVE ";
                 break;
             }
             targetAdress(assebmlerLine, expresision, positionOper - 1);
@@ -750,9 +749,9 @@ int BasicTr::ifParser()
         int jnegStr, jzStr;
         assStrings.push_back(std::to_string(assStrNum) + " LOAD " + "95");
         assStrings.push_back(std::to_string(assStrNum + 1) + " SUB " + "96");
-        assStrings.push_back(std::to_string(assStrNum + 2) + " JNEG "); //+ std::to_string(assStrNum + 5));
+        assStrings.push_back(std::to_string(assStrNum + 2) + " JNEG ");
         jnegStr = assStrings.size() - 1;
-        assStrings.push_back(std::to_string(assStrNum + 3) + " JZ "); //+ std::to_string(assStrNum + 5));
+        assStrings.push_back(std::to_string(assStrNum + 3) + " JZ ");
         jzStr = jnegStr + 1;
         assStrNum += 4;
 
@@ -769,9 +768,9 @@ int BasicTr::ifParser()
         int jnegStr, jzStr;
         assStrings.push_back(std::to_string(assStrNum) + " LOAD " + "96");
         assStrings.push_back(std::to_string(assStrNum + 1) + " SUB " + "95");
-        assStrings.push_back(std::to_string(assStrNum + 2) + " JNEG "); //+ std::to_string(assStrNum + 5));
+        assStrings.push_back(std::to_string(assStrNum + 2) + " JNEG ");
         jnegStr = assStrings.size() - 1;
-        assStrings.push_back(std::to_string(assStrNum + 3) + " JZ "); //+ std::to_string(assStrNum + 5));
+        assStrings.push_back(std::to_string(assStrNum + 3) + " JZ ");
         jzStr = jnegStr + 1;
         assStrNum += 4;
 
@@ -794,11 +793,11 @@ int BasicTr::ifParser()
         else
         {
             assStrings.push_back(std::to_string(assStrNum) + " LOAD " + "96");
-            assStrings.push_back(std::to_string(assStrNum + 2) + " SUB " + "95");
+            assStrings.push_back(std::to_string(assStrNum + 1) + " SUB " + "95");
             assStrNum += 2;
         }
         assStrings.push_back(std::to_string(assStrNum) + " JZ " + std::to_string(assStrNum + 2));
-        assStrings.push_back(std::to_string(assStrNum + 1) + " JUMP "); //+ std::to_string(assStrNum + 3));
+        assStrings.push_back(std::to_string(assStrNum + 1) + " JUMP ");
         jumpStr = assStrings.size() - 1;
         assStrNum += 2;
 
@@ -814,18 +813,14 @@ int BasicTr::ifParser()
                   << "\":" << basicStrings[basicStrNum] << std::endl;
         return -1;
     }
-
-    // std::cout << basicStrings[basicStrNum][position2 + 1] << std::endl;
-
-    std::cout << leftIfExr << std::endl;
-    std::cout << symbol << std::endl;
-    std::cout << rightIfExpr << std::endl;
-
     return 0;
 }
 
 int BasicTr::parsing()
 {
+    for (int i = 0; i < 25; ++i)
+        variableCell[i] = -1;
+
     int end = basicStrings.size();
     for (int i = 0; i < end; ++i) //check assembler lines count bounding
     {
@@ -887,17 +882,7 @@ int BasicTr::translate(std::string fileName)
         std::cout << "Cannot open file \"" << fileName << "\"";
         return -1;
     }
-
     readFile(file);
-
-    for (int i = 0; i < 25; ++i)
-        variableCell[i] = -1;
-
-    // std::cout << "1111\n";
-    // BasicExprToPolishStrParser("A+B", 1);
-    // std::cout << "2222\n";
-    // BasicExprToPolishStrParser("0", 2);
-    // std::cout << "3333\n";
 
     if (parsing() == -1)
     {
@@ -905,17 +890,22 @@ int BasicTr::translate(std::string fileName)
         return -1;
     }
 
+    //writing to assembler file
     file.close();
+    std::size_t position = fileName.find_last_of(".");
+    std::string assFile = fileName.substr(0, position) + ".sa";
+    file.open(assFile, std::ios::out);
 
-    for (int i = 0; i < assStrNum; ++i)
-        std::cout << assStrings[i] << std::endl;
+    if (!file.is_open())
+    {
+        std::cout << "Cannot create \"" << assFile << "\"\n";
+        return -1;
+    }
 
-    return 0;
-}
-
-int main()
-{
-    BasicTr::translate("basic.b");
+    for (int i = 0; i < assStrings.size(); ++i)
+    {
+        file << assStrings[i] + '\n';
+    }
 
     return 0;
 }
