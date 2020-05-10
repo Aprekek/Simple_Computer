@@ -76,7 +76,10 @@ private:
     static int BasicExprToPolishStrParser();
     static int pushPopStack(const char &symbol, std::vector<char> &stack, std::string &polishExpr, int priority);
     static int polishNotationToAssemler(std::string expresision, int storingVar);
-    static bool isDigit(const char &c);
+    static void targetAdress(const std::string &assebmlerLine,
+                             std::string &expression, int offset);
+    static void targetAdress2(const std::string &assebmlerLine, std::string assemblComand,
+                              std::string &expression, int offset, int tempCell);
     static int parsing();
 
 public:

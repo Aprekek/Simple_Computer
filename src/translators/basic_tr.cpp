@@ -254,7 +254,7 @@ int BasicTr::simpleOperParams()
 
     if (variableCell[index] == -1)
     {
-        variableCell[index] = 98 - totalVariables;
+        variableCell[index] = 96 - totalVariables;
         ++totalVariables;
     }
     assStrings[assStrNum] += std::to_string(variableCell[index]);
@@ -299,7 +299,7 @@ int BasicTr::BasicExprToPolishStrParser()
 
     if (variableCell[storingVar] == -1)
     {
-        variableCell[storingVar] = 98 - totalVariables;
+        variableCell[storingVar] = 96 - totalVariables;
         ++totalVariables;
     }
 
@@ -320,11 +320,11 @@ int BasicTr::BasicExprToPolishStrParser()
                 incorrectExpr = true;
             }
         }
-        else if (symbol == '.' || symbol == ',')
+        else if (symbol >= '0' && symbol <= '9')
         {
-            std::cout << "At line " << basicStrNum << ":\n\tNumbers must be integers: "
+            std::cout << "At line " << basicStrNum << ":\n\tExpressions must be only with variables: "
                       << expression << std::endl;
-            incorrectExpr = true;
+            return -1;
         }
         ++i;
     }
@@ -338,9 +338,9 @@ int BasicTr::BasicExprToPolishStrParser()
         return -1;
 
     //Parsing expression to polish
-    int prevOperation = 0;         //needed when parsing a single minus ex: 5 * -3
+    int prevOperation = 0;         //needed when parsing a single minus ex: A * -B
     bool isVariablePassed = false; //excludes ex: AA + B
-    i = 3;                         //excludes ex: "C ="
+    i = 4;                         //excludes ex: "C ="
     symbol = expression[i];
 
     while (symbol != '\0')
@@ -360,29 +360,13 @@ int BasicTr::BasicExprToPolishStrParser()
                           << expression << std::endl;
                 return -1;
             }
-            polishExpr.push_back(symbol);
-            polishExpr += " ";
-            isVariablePassed = true;
-        }
-        else if (isDigit(symbol)) //if digit variable
-        {
-            if (isVariablePassed)
+            if (variableCell[symbol - 'A'] == -1)
             {
-                std::cout << "At line " << basicStrNum
-                          << ":\n\tMake shure that your variable in range of A-Z in uppercase or its integer: "
-                          << expression << std::endl;
-                return -1;
+                variableCell[symbol - 'A'] = 96 - totalVariables;
+                ++totalVariables;
             }
-
-            do
-            {
-                polishExpr.push_back(symbol);
-                ++i;
-                symbol = expression[i];
-            } while (isDigit(symbol));
-            polishExpr += " ";
+            polishExpr.push_back(symbol);
             isVariablePassed = true;
-            --i; //reason is ++i in while at 378
         }
         else //if operation
         {
@@ -392,8 +376,8 @@ int BasicTr::BasicExprToPolishStrParser()
                 prevOperation = P_ADD;
                 break;
             case '-':
-                if (isVariablePassed == false) // ex: 5 * -3
-                    polishExpr += "0 ";
+                if (isVariablePassed == false) // ex: A * -B
+                    polishExpr += "0";
 
                 prevOperation = P_SUB;
                 break;
@@ -441,7 +425,6 @@ int BasicTr::pushPopStack(const char &symbol, std::vector<char> &stack,
         while (i > -1)
         {
             polishExpr.push_back(stack[i]);
-            polishExpr += " ";
             --i;
         }
         return 0;
@@ -463,7 +446,6 @@ int BasicTr::pushPopStack(const char &symbol, std::vector<char> &stack,
             if ((popedSymbol == '*') || (popedSymbol == '/'))
             {
                 polishExpr.push_back(popedSymbol);
-                polishExpr += " ";
                 stack.pop_back();
                 --i;
             }
@@ -480,7 +462,6 @@ int BasicTr::pushPopStack(const char &symbol, std::vector<char> &stack,
                 break;
 
             polishExpr.push_back(popedSymbol);
-            polishExpr += " ";
             stack.pop_back();
             --i;
         }
@@ -500,7 +481,6 @@ int BasicTr::pushPopStack(const char &symbol, std::vector<char> &stack,
                     if ((popedSymbol == '*') || (popedSymbol == '/'))
                     {
                         polishExpr.push_back(popedSymbol);
-                        polishExpr += " ";
                         stack.pop_back();
                         --i;
                     }
@@ -511,7 +491,6 @@ int BasicTr::pushPopStack(const char &symbol, std::vector<char> &stack,
             }
 
             polishExpr.push_back(popedSymbol);
-            polishExpr += " ";
         }
         return 0;
     }
@@ -524,30 +503,146 @@ int BasicTr::pushPopStack(const char &symbol, std::vector<char> &stack,
 //dont work
 int BasicTr::polishNotationToAssemler(std::string expresision, int storingVar)
 {
+    //a - accumulator; 1 - 98 cell; 2 - 99 cell
     std::string assebmlerLine;
-    int end = expresision.size();
-    char symbol = expresision[0];
-    int i = 1;
+    std::size_t positionOper;
+    std::size_t positionAccum;
+    //   std::size_t positionTempCell;
+    char symbol;
+    int tempCell = 1; // if 1 cell = 98 if 0 cell = 99
+    //int end = expresision.size();
+    // int i = 0;
 
-    /*if (isDigit(symbol))
+    if (expresision.size() != 1)
     {
-        assebmlerLine = "  ";
+        positionOper = expresision.find_first_of("+-/*");
+        symbol = expresision[positionOper - 2];
+        expresision[positionOper - 2] = 'a';
+    }
+    else
+    {
+        positionOper = 0;
+        symbol = expresision[positionOper];
+    }
+    assStrings[assStrNum] = (std::to_string(assStrNum) + " LOAD " + std::to_string(variableCell[symbol - 'A']));
+    ++assStrNum;
+
+    while (expresision.size() - 1 > 0)
+    {
+        symbol = expresision[positionOper]; //+-/*
+
+        positionAccum = expresision.find("a");
+
+        if (expresision[positionOper - 1] == 'a')
+        {
+            switch (symbol)
+            {
+            case '+':
+                assebmlerLine = std::to_string(assStrNum) + " ADD ";
+                targetAdress(assebmlerLine, expresision, positionOper - 2);
+                break;
+            case '-':
+                assebmlerLine = std::to_string(assStrNum) + " STORE ";
+                targetAdress2(assebmlerLine, " SUB ", expresision, positionOper - 2, tempCell);
+                break;
+            case '*':
+                assebmlerLine = std::to_string(assStrNum) + " MUL ";
+                targetAdress(assebmlerLine, expresision, positionOper - 2);
+                break;
+            case '/':
+                assebmlerLine = std::to_string(assStrNum) + " STORE ";
+                targetAdress2(assebmlerLine, " DIV ", expresision, positionOper - 2, tempCell);
+                break;
+            }
+        }
+        else
+        {
+            if (expresision[positionOper - 2] != 'a')
+            {
+                expresision[positionAccum] = (tempCell) ? '1' : '2';
+                assStrings.push_back(std::to_string(assStrNum) + " STORE " + std::to_string(99 - tempCell));
+                ++assStrNum;
+                tempCell ^= 1;
+                assebmlerLine = std::to_string(assStrNum) + " LOAD ";
+                targetAdress(assebmlerLine, expresision, positionOper - 2);
+            }
+            switch (symbol)
+            {
+            case '+':
+                assebmlerLine = std::to_string(assStrNum) + " ADD ";
+                break;
+            case '-':
+                assebmlerLine = std::to_string(assStrNum) + " SUB ";
+                break;
+            case '*':
+                assebmlerLine = std::to_string(assStrNum) + " MUL ";
+                break;
+            case '/':
+                assebmlerLine = std::to_string(assStrNum) + " DIV ";
+                break;
+            }
+            targetAdress(assebmlerLine, expresision, positionOper - 1);
+        }
+        expresision.erase(positionOper - 2, 2);
+        expresision[positionOper - 2] = 'a';
+        positionOper = expresision.find_first_of("+-/*");
     }
 
-    for (; i < end; ++i)
-    {
-    }*/
-
-    // fromm accumulator to cell
-    assebmlerLine = std::to_string(i) + " STORE " + std::to_string(variableCell[storingVar]);
-    assStrings.push_back(assebmlerLine);
+    assStrings.push_back(std::to_string(assStrNum) + " STORE " + std::to_string(variableCell[storingVar]));
+    ++assStrNum;
 }
 
-bool BasicTr::isDigit(const char &c)
+void BasicTr::targetAdress(const std::string &assebmlerLine, std::string &expression, const int offset)
 {
-    if ((c - '0' > -1) && (c - '0') < 10)
-        return 1;
-    return 0;
+    if (expression[offset] == '1')
+        assStrings.push_back(assebmlerLine + "98");
+    else if (expression[offset] == '2')
+        assStrings.push_back(assebmlerLine + "99");
+    else if (expression[offset] == '0')
+        assStrings.push_back(assebmlerLine + "97");
+    else
+        assStrings.push_back(assebmlerLine + std::to_string(variableCell[expression[offset] - 'A']));
+    ++assStrNum;
+}
+
+void BasicTr::targetAdress2(const std::string &assebmlerLine, std::string assemblComand, std::string &expression, int offset, int tempCell)
+{
+    if (expression[offset] == '1') //if ex: 1a-
+    {
+        assStrings.push_back(assebmlerLine + "99");
+        ++assStrNum;
+        assStrings.push_back(std::to_string(assStrNum) + " LOAD 98");
+        ++assStrNum;
+        assStrings.push_back(std::to_string(assStrNum) + assemblComand + " 99");
+    }
+    else if (expression[offset] == '2') //if ex: 2a-
+    {
+        assStrings.push_back(assebmlerLine + "98");
+        ++assStrNum;
+        assStrings.push_back(std::to_string(assStrNum) + " LOAD 99");
+        ++assStrNum;
+        assStrings.push_back(std::to_string(assStrNum) + assemblComand + "98");
+    }
+    else if (expression[offset] == '0') //if ex: 0a-
+    {
+        assStrings.push_back(assebmlerLine + std::to_string(99 - tempCell));
+        ++assStrNum;
+        assStrings.push_back(std::to_string(assStrNum) + " LOAD 97");
+        ++assStrNum;
+        assStrings.push_back(std::to_string(assStrNum) + assemblComand + std::to_string(99 - tempCell));
+        tempCell ^= 1;
+    }
+    else
+    {
+        assStrings.push_back(assebmlerLine + std::to_string(99 - tempCell));
+        ++assStrNum;
+        assStrings.push_back(std::to_string(assStrNum) +
+                             " LOAD " + std::to_string(variableCell[expression[offset] - 'A']));
+        ++assStrNum;
+        assStrings.push_back(std::to_string(assStrNum) + assemblComand + std::to_string(99 - tempCell));
+        tempCell ^= 1;
+    }
+    ++assStrNum;
 }
 
 int BasicTr::parsing()
@@ -575,6 +670,17 @@ int BasicTr::parsing()
         node = goToTargets.getHeadNode();
         assStrings[node->assGoToNum] += std::to_string(node->assTagrNum);
         goToTargets.deleteCurNode();
+    }
+
+    int order;
+    for (int i = 24; i > -1; --i)
+    {
+        order = variableCell[i];
+        if (order != -1)
+        {
+            assStrings.push_back(std::to_string(order) + " = +0000");
+            ++assStrNum;
+        }
     }
 
     return 0;

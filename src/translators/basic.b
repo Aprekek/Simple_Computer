@@ -1,9 +1,9 @@
 0 REM comment
 1 INPUT A
 2 INPUT B
-3 GOTO 5
+3 GOTO 7
 4 END
-5 LET C = 55
-6 LET C = A*(B-B*(C+22))+3/2*(-B)
+5 LET A = (C-B)/(-B)
+6 REM LET C = A+B*((A-C)+B)-A/B
 7 PRINT C
 8 END
