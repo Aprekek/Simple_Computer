@@ -3,4 +3,16 @@
 run: make all
 clean: make clean
 
-config/ - the folder from which files are downloaded and saved (specify file names in the program without "config/")
+File with simple basic code must be with the extension .b
+File with simple assembler code must be with the extension .sa
+
+__CODE_STYLE__
+
+- The distance between the fields should be equal to 1 space;
+- Lines must be numbered in order;
+- A variable name consists of only one letter (A-Z);
+- Variables only work with integers;
+- Expressions for "LET" work only with variables;
+- "IF" only supports 3 conventional characters: '>', '<', '='
+- In “IF”, the expressions to the left and right of the symbol must be in brackets, for example: 01 IF (A) > (B + C) WRITE A
+- The program should end with the word "END" and "HALT" for the base and assembler, respectively

@@ -1,6 +1,6 @@
 #include "includes/alu.h"
 
-int ALU::execute(const int &comand, const int &operand, s_computerUI *ui)
+void ALU::execute(const int &comand, const int &operand, s_computerUI *ui)
 {
     int value;
     switch (comand)

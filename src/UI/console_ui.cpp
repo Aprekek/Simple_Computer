@@ -1,10 +1,17 @@
 #include "includes/console_ui.h"
 
-inline void flushSTDIN()
+void flushSTDIN()
 {
-    //std::cin.clear();
-    while (getchar() != '\n')
-        ;
+    std::cout << std::dec;
+    std::cin.sync();
+    if (std::cin.rdbuf()->in_avail() == 0)
+        return;
+
+    char ch = getchar();
+    while (ch != '\n' && ch != '\0')
+    {
+        ch = getchar();
+    }
 }
 
 //________UI___________
@@ -51,23 +58,42 @@ void _UI_::free()
 
 const std::string s_computerUI::SYST_PATH = "config/syst";
 
-s_computerUI::s_computerUI() : _UI_::_UI_()
+s_computerUI::s_computerUI(std::string pathToFile) : _UI_::_UI_()
 {
     computer = SimpleComputer::getInstance();
-    if (!termLoad())
-    {
-        Terminal::setFgColor(Terminal::FG_RED);
-        std::cout << "Cannot loading last terminal states. Terminal will be reset\n";
-        Terminal::setFgColor(Terminal::FG_DEFAULT);
-        std::cout << "Press any key!\n";
-        MyKeyBoard::switchToRaw();
-        getchar();
+    reset();
 
-        reset();
+    MyKeyBoard::switchToRaw();
+    if (BasicTr::translate(pathToFile) == -1)
+    {
+        std::cout << "\nPress any key to continue\n";
+        getchar();
+        getchar();
+        computer->memoryLoad(SYST_PATH);
     }
     else
-        computer->regInit();
+    {
+        pathToFile = pathToFile.substr(0, pathToFile.find_last_of(".")) + ".sa";
+        if (AssemblerTR::translate(pathToFile) == -1)
+        {
+            std::cout << "\nPress any key to continue\n";
+            getchar();
+            getchar();
+            computer->memoryLoad(SYST_PATH);
+        }
+        else
+        {
+            std::cout << "aa\n";
+            if (initRAMfromObjFile("config/assembler.sa") == -1)
+            {
+                std::cout << "Press any key to continue\n";
+                getchar();
 
+                computer->memoryLoad(SYST_PATH);
+            }
+            std::cout << "bb\n";
+        }
+    }
     sComputerCU = new CU();
 };
 
@@ -79,16 +105,60 @@ void s_computerUI::reset()
     computer->init();
 }
 
-_UI_ *s_computerUI::getInstance()
+_UI_ *s_computerUI::getInstance(std::string pathToFile)
 {
     ++instValue;
     if (instance == nullptr)
     {
-        instance = new s_computerUI();
+        instance = new s_computerUI(pathToFile);
     }
 
     return instance;
 };
+
+int s_computerUI::initRAMfromObjFile(std::string fileName)
+{
+    std::size_t position = fileName.find_last_of(".");
+    std::string objFileName = fileName.substr(0, position) + ".o";
+    std::fstream file(objFileName, std::ios::in | std::ios::binary);
+
+    if (!file.is_open())
+
+    {
+        std::cout << "Cannot open file \"" << objFileName << "\"\n";
+        file.close();
+        return -1;
+    }
+
+    std::array<Node *, 100> arrayList;
+    int value;
+    int i = 0;
+
+    while (!file.eof())
+    {
+        arrayList[i] = new Node;
+        file.read((char *)(arrayList[i]), 12);
+        ++i;
+    }
+    --i;
+
+    for (int j = 0; j < i; ++j)
+    {
+        if (arrayList[j]->comand != 0x01)
+            computer->commandEncode(arrayList[j]->comand, arrayList[j]->operand, value);
+        else
+        {
+
+            std::string number;
+            std::stringstream toOct;
+            toOct << std::oct << abs(arrayList[j]->operand);
+            toOct >> value;
+            if (arrayList[j]->operand < 0)
+                value *= (-1);
+        }
+        computer->memorySet(arrayList[j]->cellKey, value);
+    }
+}
 
 void s_computerUI::printBigCell() const
 {
@@ -227,7 +297,8 @@ void s_computerUI::drawBoxes() const
     AltTermMode::printBox(7, 72, 30, 3);   //operation box
     AltTermMode::printBox(10, 72, 30, 3);  //flags box
     AltTermMode::printBox(13, 1, 50, 10);  //big chars box
-    AltTermMode::printBox(13, 51, 50, 10); //key box
+    AltTermMode::printBox(13, 51, 51, 10); //key box
+    AltTermMode::printBox(23, 84, 18, 3);  //show box
 
     printNames();
     printKeys();
@@ -247,6 +318,8 @@ void s_computerUI::printNames() const
     write(1, " Flags ", 8);
     Terminal::gotoXY(13, 73);
     write(1, " Keys ", 7);
+    Terminal::gotoXY(23, 89);
+    write(1, " Output ", 9);
 }
 
 void s_computerUI::printKeys() const
@@ -303,6 +376,12 @@ void s_computerUI::printConditions()
     len = strlen(operation);
     Terminal::gotoXY(8, 89 - len); //print operation
     write(1, operation, len);
+
+    Terminal::setBgColor(Terminal::BG_YELLOW);
+    len = strlen(outputAnswer);
+    Terminal::gotoXY(24, 93 - (len / 2));
+    write(1, outputAnswer, len);
+    Terminal::setBgColor(Terminal::BG_DEFAULT);
 };
 
 int s_computerUI::termSave(std::string path) const
@@ -317,6 +396,9 @@ int s_computerUI::termLoad(std::string path)
 
 void s_computerUI::changeCell()
 {
+    std::cout << "Please press ENTER to continue\n";
+    flushSTDIN();
+
     int command, operand, value;
     int offset = 0;
     int choice;
@@ -325,7 +407,8 @@ void s_computerUI::changeCell()
     while (true)
     {
         std::cout << "to enter in the form: (\"command\", \"operand\")"
-                  << " or enter just a number, press 1 or 2, respectively: ";
+                  << " or enter just a number, press 1 or 2, respectively\n";
+
         std::cin >> choice;
         if (choice == 1)
         {
@@ -337,10 +420,10 @@ void s_computerUI::changeCell()
                 std::cin >> std::dec >> operand;
                 if (!computer->commandEncode(command, operand, value))
                 {
-                    offset += 3;
+                    offset += 5;
                     computer->regSet(WRONG_COMAND, 1);
                     printFlagReg();
-                    Terminal::gotoXY(23 + offset, 0);
+                    Terminal::gotoXY(25 + offset, 0);
                     Terminal::setFgColor(Terminal::FG_RED);
                     std::cout << "Wrong command or operand\n";
                     Terminal::setFgColor(Terminal::FG_DEFAULT);
@@ -423,7 +506,6 @@ void s_computerUI::checkDelayPassed()
             timerIncr();
             computer->regSet(WRONG_COMAND, 1);
             computer->regSet(IGNR_CLOCK_PULSES, 1);
-            //printFlagReg();
             Terminal::gotoXY(23, 0);
             Terminal::setFgColor(Terminal::FG_RED);
             std::cout << "Wrong command or operand\nPress ENTER to continue" << std::endl;
@@ -443,34 +525,6 @@ void s_computerUI::alarmSwitchOff(int sig)
 void s_computerUI::signalHandler(int sig)
 {
     delayPassed = true;
-    /*//static bool isRunFlag = false;
-    static s_computerUI *inst = (s_computerUI *)getInstance();
-    if (!inst->termRun)
-        return;
-    else
-    {
-        //inst->sComputerCU->execute();
-        inst->termRun = 0;
-        inst->computer->regSet(IGNR_CLOCK_PULSES, 1);
-        inst->printFlagReg();
-        Terminal::gotoXY(23, 0);
-        //isRunFlag = true;
-
-    if (inst->sComputerCU->execute() == -1)
-    {
-        flushSTDIN();
-        getchar();
-        //isRunFlag = false;
-        return;
-    }
-
-    inst->computer->regSet(IGNR_CLOCK_PULSES, 0);
-        inst->printFlagReg();
-        Terminal::gotoXY(23, 0);
-        //isRunFlag = false;
-    inst->termRun = 1;
-}
-*/
 }
 
 void s_computerUI::timerIncr()
@@ -510,7 +564,7 @@ std::string s_computerUI::getPath() const
 
 void s_computerUI::delegation(MyKeyBoard::Keys key)
 {
-    static bool isRunFlag;
+    flushSTDIN();
     if (termRun && key != MyKeyBoard::Keys::r_key)
         return;
 
@@ -589,7 +643,7 @@ void s_computerUI::drawUI()
     Terminal::clearScreen();
     drawBoxes();
     printConditions();
-    Terminal::gotoXY(23, 0);
+    Terminal::gotoXY(25, 0);
 }
 
 void s_computerUI::execute()
