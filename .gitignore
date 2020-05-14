@@ -4,8 +4,6 @@
 *#
 *.d
 launcher
-config/*
-!config/syst
 */f_d
 */f_obj
 src/a_libr
